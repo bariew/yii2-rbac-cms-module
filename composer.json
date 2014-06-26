@@ -1,8 +1,8 @@
 {
-    "name": "bariew/yii2-page-rbac-module",
+    "name": "bariew/yii2-rbac-cms-module",
     "description": "in development",
     "type": "yii2-extension",
-    "keywords": ["yii2","module","rbac"],
+    "keywords": ["yii2","module","rbac", "cms"],
     "license": "BSD-3-Clause",
     "authors": [
         {
