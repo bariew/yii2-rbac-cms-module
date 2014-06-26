@@ -6,6 +6,7 @@
  */
 
 namespace bariew\rbacModule\controllers;
+use bariew\rbacModule\models\AuthItem;
 use Yii;
 use yii\web\Controller;
 use yii\helpers\Html;
@@ -25,22 +26,17 @@ class AuthItemController extends Controller
     /**
      *@inheritdoc
      */
-    protected $modelClass = 'AuthItem';
-    
-    /**
-     *@inheritdoc
-     */
     public $layout = '//menu';
-    
+
+    public $enableCsrfValidation = false;
     /**
      * Generates menu.
      * @return Widget menu
      */
-    public function menu()
+    public function getMenu()
     {
         $model = $this->findModel('root');
-        return Html::tag("div", Yii::t('backend', 'manual_rbac_tree'), ['class' => 'manual'])
-            . $model->menuWidget([], 'menuCallback');
+        return $model->menuWidget([], 'menuCallback');
     }
     /**
      * Название раздела.
@@ -69,7 +65,7 @@ class AuthItemController extends Controller
     public function actionUpdate($id)
     {
         $pid = Yii::$app->request->get('pid');
-        $model = $this->getModel($id);
+        $model = $this->findModel($id);
         $parent = $pid ? $this->findModel($pid) : $model;
         if ($model->load(\Yii::$app->request->post())) {
             if (!$model->save() && Yii::$app->request->isAjax) {
@@ -90,7 +86,7 @@ class AuthItemController extends Controller
     public function actionTreeCreateRole($id)
     {
         $parent = $this->findModel($id);
-        $model =  $this->getModel();
+        $model =  $this->findModel();
         $model->type = 1;
         if ($model->load(\Yii::$app->request->post()) && $model->save()) {
             $parent->addChild($model);
@@ -108,13 +104,18 @@ class AuthItemController extends Controller
     public function actionTreeCreatePermission($id)
     {
         $parent = $this->findModel($id);
-        $model = $this->getModel();
+        $model = $this->findModel();
         $model->type = 2;
         if ($model->load(\Yii::$app->request->post())) {
-            $child = $this->findModel($model->name);
-            $parent->addChild($child);
-            Yii::$app->session->setFlash('success', Yii::t('backend', 'model_success_saved_{id}'));
-            return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
+            if (!$child = AuthItem::findOne(['name'=>$model->name])) {
+                $child = $model;
+            }
+
+            if (!$child->isNewRecord || $child->save()) {
+                $parent->addChild($child);
+                Yii::$app->session->setFlash('success', Yii::t('backend', 'model_success_saved_{id}'));
+                return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
+            }
         }
         return $this->render('form', compact('model'));
     }
@@ -168,10 +169,12 @@ class AuthItemController extends Controller
     /**
      * @inheritdoc
      */
-    protected function findModel($id)
+    protected function findModel($id = false)
     {
-        $modelClass = $this->modelClassName;
-        if (($model = $modelClass::findOne(['name'=>$id])) !== null) {
+        if (!$id) {
+            return new AuthItem();
+        }
+        if (($model = AuthItem::findOne(['name'=>$id])) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');

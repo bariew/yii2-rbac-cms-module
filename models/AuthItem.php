@@ -9,6 +9,7 @@ namespace bariew\rbacModule\models;
 
 use Yii;
 use yii\base\Event;
+use yii\helpers\FileHelper;
 use \yii\rbac\Item;
 use yii\db\ActiveRecord;
 use \bariew\rbacModule\components\TreeBuilder;
@@ -40,6 +41,43 @@ class AuthItem extends ActiveRecord
             Item::TYPE_PERMISSION => Yii::t('modules/rbac', 'permission'),
         ];
     }
+
+    public static function permissionList()
+    {
+        $result = [];
+        foreach (Yii::$app->modules as $name => $config) {
+            $module = Yii::$app->getModule($name);
+            $controllerFiles = FileHelper::findFiles($module->controllerPath);
+            foreach ($controllerFiles as $file) {
+                $name = preg_replace('/.*\/(\w+)Controller\.php$/', '$1', $file);
+                $id = self::getRouteName($name);
+                $controller = $module->createControllerByID($id);
+                $actions = array_keys($controller->actions());
+                $reflection = new \ReflectionClass($controller);
+                foreach ($reflection->getMethods() as $method) {
+                    if (!preg_match('/action(.*)/', $method->name, $matches)) {
+                        continue;
+                    }
+                    $actions[] = self::getRouteName($matches[1]);
+                }
+                foreach ($actions as $action) {
+                    $result[] = self::createPermissionName([$module->id, $controller->id, $action]);
+                }
+            }
+        }
+        asort($result);
+        return array_combine($result, $result);
+    }
+
+    public static function getRouteName($string)
+    {
+        return strtolower(
+            implode('-',
+                preg_split('/([[:upper:]][[:lower:]]+)/', $string, null, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY)
+            )
+        );
+    }
+
     /**
      * Checks whether current user has access to current controller action.
      * @param Event $event controller beforeAction event.
@@ -204,10 +242,9 @@ class AuthItem extends ActiveRecord
      */
     public function move($oldParent, $newParent)
     {
-        if ($oldParent->removeChild($this)) {
-            return $newParent->addChild($this);
-        }
-        return false;
+        return $oldParent->removeChild($this)
+            ? $newParent->addChild($this)
+            : false;
     }
 
     /**
@@ -228,55 +265,6 @@ class AuthItem extends ActiveRecord
     public function removeChild($item)
     {
         return Yii::$app->authManager->removeChild($this, $item);
-    }
-
-    /**
-     * Находит в таблице все роли.
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public static function findRoles()
-    {
-        return static::find()
-            ->where(['type' => Item::TYPE_ROLE]);
-    }
-
-    /**
-     * Находит в таблице все права доступа.
-     *
-     * @return \yii\db\ActiveQuery
-     */
-    public static function findPermissions()
-    {
-        return static::find()
-            ->where(['type' => Item::TYPE_PERMISSION]);
-    }
-
-    /**
-     * Generates readable role list.
-     * @return array role list
-     */
-    public static function roleList()
-    {
-        $roles = self::findRoles()->indexBy('name')->asArray()->all();
-        $roles = ArrayHelper::map($roles, 'name', 'name');
-        array_unshift($roles, '');
-        return $roles;
-    }
-
-    /**
-     * Generates readable permission list.
-     * @return array permission list
-     */
-    public static function permissionList()
-    {
-        $result = [];
-        $items = self::findPermissions()->select('name')->column();
-        $y = 'Yii';
-        foreach ($items as $name) {
-            $result[$name] = $y::t('access', $name);
-        }
-        return $result;
     }
 
     /**

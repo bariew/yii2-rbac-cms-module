@@ -9,7 +9,8 @@
 namespace bariew\rbacModule\models;
 
 use Yii;
-use \common\models\ActiveRecord;
+use yii\db\ActiveRecord;
+
 /**
  * This is the model class for table "auth_item_child".
  *

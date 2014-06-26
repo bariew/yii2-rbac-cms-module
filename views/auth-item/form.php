@@ -1,21 +1,21 @@
 <?php
 
-use backend\components\ActiveForm;
+use yii\bootstrap\ActiveForm;
 /**
  * @var yii\web\View $this
  * @var bariew\rbacModule\models\AuthItem $model
  * @var yii\widgets\ActiveForm $form
  */
 
-$form = ActiveForm::begin(['includeLabel' => false]);
+$form = ActiveForm::begin();
 
 if ($model->type == 1) {
-    echo $form->field($model, 'name')->compactInput();
+    echo $form->field($model, 'name')->textInput();
 } else if ($model->isNewRecord) {
     echo $form->field($model, 'name')->dropDownList($model->permissionList());
 }
 
-echo $form->field($model, 'description')->compactTextarea(['rows' => 6]);
+echo $form->field($model, 'description')->textarea(['rows' => 6]);
 
 ?>
 <div class="form-group">

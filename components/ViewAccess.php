@@ -7,11 +7,11 @@
 
 namespace bariew\rbacModule\components;
 
-use common\helpers\UrlHelper;
-use yii\base\Object;
-use bariew\rbacModule\models\AuthItem;
 use \Yii;
+use yii\base\Object;
 use yii\base\ViewEvent;
+use bariew\rbacModule\helpers\UrlHelper;
+use bariew\rbacModule\models\AuthItem;
 
 /**
  * Manages View access: removes restricted elements.
