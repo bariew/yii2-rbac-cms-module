@@ -93,7 +93,7 @@ class AuthItemController extends Controller
             Yii::$app->session->setFlash('success', Yii::t('backend', 'model_success_saved_{id}'));
             return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
         }
-        return $this->render('form', compact('model'));
+        return $this->render('_form', compact('model'));
     }
     
     /**
@@ -117,7 +117,7 @@ class AuthItemController extends Controller
                 return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
             }
         }
-        return $this->render('form', compact('model'));
+        return $this->render('_form', compact('model'));
     }
     
     /**

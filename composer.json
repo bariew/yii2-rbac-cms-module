@@ -11,7 +11,8 @@
         }
     ],
     "require"   : {
-        "bariew/yii2-node-tree" : "1.*"
+        "bariew/yii2-node-tree" : "1.*",
+        "yiisoft/yii2-jui": "*"
     },
     "autoload": {
         "psr-4": {

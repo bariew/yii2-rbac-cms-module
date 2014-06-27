@@ -267,6 +267,28 @@ class AuthItem extends ActiveRecord
         return Yii::$app->authManager->removeChild($this, $item);
     }
 
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAuthAssignments()
+    {
+        return $this->hasMany(AuthAssignment::className(), ['item_name' => 'name']);
+    }
+
+    /**
+     * Gets items attached to current one by AuthItemChild relation.
+     * @return array of AuthItems
+     */
+    public function getUsers()
+    {
+        if (!$user = AuthAssignment::userInstance()) {
+            return [];
+        }
+        return $this->hasMany($user::className(), ['id' => 'user_id'])
+            ->via('authAssignments');
+    }
+
     /**
      * Some times in views you just need give them 'id'
      * @return string model name

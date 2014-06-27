@@ -52,6 +52,13 @@ class AuthAssignmentController extends Controller
             ->menuWidget(['selected'=>$permissions], 'checkboxCallback');
         return $this->render('userPermissions', compact('treeWidget'));
     }
+
+    public function actionRoleUsers($name)
+    {
+        $users = AuthAssignment::userList();
+        $role = AuthItem::findOne($name);
+        echo $this->renderPartial('role-users', compact('role', 'users'));
+    }
     
     /**
      * Attaches or detaches user role/permission.

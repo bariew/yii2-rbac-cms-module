@@ -9,6 +9,7 @@ namespace bariew\rbacModule\models;
 use Yii;
 use \yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "auth_assignment".
@@ -85,5 +86,31 @@ class AuthAssignment extends ActiveRecord
     {
         $names = self::find()->where(['user_id' => $user->id])->select('item_name')->column();
         return AuthItem::find()->where(['in', 'name', $names]);
+    }
+
+    public static function userList()
+    {
+        if (!$user = self::userInstance()) {
+            return [];
+        }
+
+        foreach (['name', 'username', 'login', 'id'] as $attribute) {
+            if ($user->hasAttribute($attribute)) {
+                $name = $attribute;
+                break;
+            }
+        }
+        return isset($name)
+            ? ArrayHelper::map($user::find()->all(), 'id', $name)
+            : [];
+    }
+
+    public static function userInstance()
+    {
+        if (!isset(Yii::$app->user)) {
+            return [];
+        }
+        $className = Yii::$app->user->identityClass;
+        return new $className();
     }
 }
