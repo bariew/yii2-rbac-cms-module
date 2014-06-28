@@ -1,6 +1,5 @@
 <?php
 
-
     echo \yii\jui\Tabs::widget([
         'items' => [
             [

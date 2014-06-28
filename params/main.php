@@ -15,7 +15,7 @@ return [
         ],
     ],
     'menu'  => [
-        'label'    => 'Access',
+        'label'    => 'Rbac',
         'url' => ['/rbac/auth-item/index'],
     ]
 ];

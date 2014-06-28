@@ -34,7 +34,7 @@ class AuthAssignmentController extends Controller
      */
     public function getTitle()
     {
-        return Yii::t('backend', 'title_roles_to_managers');
+        return Yii::t('modules/rbac', 'title_roles_to_managers');
     }
     
     /**
@@ -47,7 +47,7 @@ class AuthAssignmentController extends Controller
         $user = Manager::findOne($id);
         $permissions = AuthAssignment::userAssignments($user)
             ->select('name')->column();
-        $treeWidget = Html::tag("div", Yii::t('backend', 'manual_rbac_tree'), ['class' => 'manual'])
+        $treeWidget = Html::tag("div", Yii::t('modules/rbac', 'manual_rbac_tree'), ['class' => 'manual'])
             . AuthItem::findOne('root')
             ->menuWidget(['selected'=>$permissions], 'checkboxCallback');
         return $this->render('userPermissions', compact('treeWidget'));

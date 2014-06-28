@@ -87,8 +87,8 @@ class AuthItem extends ActiveRecord
         $controller = $event->sender;
         $permissionName = [$controller->module->id, $controller->id, $controller->action->id];
         if (!self::checkAccess($permissionName, Yii::$app->user)) {
-            Yii::$app->session->setFlash('error', Yii::t('backend', 'rbac_access_denied'));
-            $controller->redirect(Yii::$app->request->referrer);
+            Yii::$app->session->setFlash('danger', Yii::t('modules/rbac', 'rbac_access_denied'));
+            $controller->redirect('/');
         }
     }
 

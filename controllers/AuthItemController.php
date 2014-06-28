@@ -45,7 +45,7 @@ class AuthItemController extends Controller
      */
     public function getTitle()
     {
-        return Yii::t('backend', 'title_roles');
+        return Yii::t('modules/rbac', 'title_roles');
     }
     
     /**
@@ -72,7 +72,7 @@ class AuthItemController extends Controller
                 Yii::$app->response->format = Response::FORMAT_JSON;
                 return $model->getErrors();               
             }
-            Yii::$app->session->setFlash('success', Yii::t('backend', 'model_success_saved_{id}'));
+            Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'model_success_saved_{id}'));
             return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
         }
         return $this->render('form', compact('model'));
@@ -90,7 +90,7 @@ class AuthItemController extends Controller
         $model->type = 1;
         if ($model->load(\Yii::$app->request->post()) && $model->save()) {
             $parent->addChild($model);
-            Yii::$app->session->setFlash('success', Yii::t('backend', 'model_success_saved_{id}'));
+            Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'model_success_saved_{id}'));
             return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
         }
         return $this->render('_form', compact('model'));
@@ -113,7 +113,7 @@ class AuthItemController extends Controller
 
             if (!$child->isNewRecord || $child->save()) {
                 $parent->addChild($child);
-                Yii::$app->session->setFlash('success', Yii::t('backend', 'model_success_saved_{id}'));
+                Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'model_success_saved_{id}'));
                 return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
             }
         }
