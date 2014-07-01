@@ -55,18 +55,20 @@ class AuthItem extends ActiveRecord
                 $actions = array_keys($controller->actions());
                 $reflection = new \ReflectionClass($controller);
                 foreach ($reflection->getMethods() as $method) {
-                    if (!preg_match('/action(.*)/', $method->name, $matches)) {
+                    if (!preg_match('/action([A-Z].*)/', $method->name, $matches)) {
                         continue;
                     }
                     $actions[] = self::getRouteName($matches[1]);
                 }
                 foreach ($actions as $action) {
-                    $result[] = self::createPermissionName([$module->id, $controller->id, $action]);
+                    $rule = [$module->id, $controller->id, $action];
+                    $permission = self::createPermissionName($rule);
+                    $result[$permission] = Yii::$app->urlManager->createUrl([implode('/', $rule)]);
                 }
             }
         }
-        asort($result);
-        return array_combine($result, $result);
+        array_multisort($result);
+        return $result;
     }
 
     public static function getRouteName($string)
