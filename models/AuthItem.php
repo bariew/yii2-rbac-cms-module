@@ -34,7 +34,13 @@ use yii\helpers\ArrayHelper;
  */
 class AuthItem extends ActiveRecord
 {
+    /**
+     * @var array container for autItem tree for menu widget.
+     */
     public $childrenTree = [];
+
+    public static $userAccess = [];
+    public static $allPermissions = [];
 
     public static function typeList()
     {
@@ -106,6 +112,13 @@ class AuthItem extends ActiveRecord
         return implode('_', $data);
     }
 
+    protected static function setUserAccess($user_id)
+    {
+        self::$userAccess[$user_id] = [
+            'roles' => Yii::$app->authManager->getRolesByUser($user_id),
+            'permissions'   => Yii::$app->authManager->getPermissionsByUser($user_id)
+        ];
+    }
     /**
      * Check whether the user has access to permission.
      * @param mixed $permissionName permission name or its components for self::createPermissionName.
@@ -117,15 +130,21 @@ class AuthItem extends ActiveRecord
         if (!$user) {
             $user = Yii::$app->user;
         }
+        if (!isset(self::$userAccess[$user->id])) {
+            self::setUserAccess($user->id);
+        }
         if (is_array($permissionName)) {
             $permissionName = self::createPermissionName($permissionName);
         }
         $auth = Yii::$app->authManager;
-        if (isset($auth->getRolesByUser($user->id)['root'])) {
-            return true;
+        if (isset(self::$userAccess[$user->id]['roles']['root'])) {
+            //return true;
         }
-        $permissions = array_keys($auth->getPermissions());
-        if (!in_array($permissionName, $permissions)) {
+        if (!self::$allPermissions) {
+            self::$allPermissions = $auth->getPermissions();
+        }
+
+        if (!isset(self::$allPermissions[$permissionName])) {
             return true;
         }
 
