@@ -34,6 +34,8 @@ use yii\helpers\ArrayHelper;
  */
 class AuthItem extends ActiveRecord
 {
+    public $childrenTree = [];
+
     public static function typeList()
     {
         return [
@@ -87,7 +89,7 @@ class AuthItem extends ActiveRecord
     public static function checkActionAccess($event)
     {
         $controller = $event->sender;
-        $permissionName = [$controller->module->id, $controller->id, $controller->action->id];
+        $permissionName = self::createPermissionName([$controller->module->id, $controller->id, $controller->action->id]);
         if (!self::checkAccess($permissionName, Yii::$app->user)) {
             Yii::$app->session->setFlash('danger', Yii::t('modules/rbac', 'rbac_access_denied'));
             $controller->redirect('/');
@@ -178,6 +180,7 @@ class AuthItem extends ActiveRecord
             TimestampBehavior::className(),
             [
                 'class' => TreeBuilder::className(),
+                'childrenAttribute' => 'childrenTree',
                 'actionPath' => '/rbac/auth-item/update'
             ],
         ];

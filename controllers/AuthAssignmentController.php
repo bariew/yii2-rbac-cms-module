@@ -12,6 +12,7 @@ use \bariew\rbacModule\models\AuthItem;
 use Yii;
 use \bariew\rbacModule\models\AuthAssignment;
 use yii\helpers\Html;
+use yii\web\HttpException;
 
 /**
  * Контроллер отвечает за назначение определенных "ролей" для "пользователей".
@@ -59,12 +60,13 @@ class AuthAssignmentController extends Controller
         $role = AuthItem::findOne($name);
         echo $this->renderPartial('role-users', compact('role', 'users'));
     }
-    
+
     /**
      * Attaches or detaches user role/permission.
      * @param string $id permission/role name.
      * @param integer $user_id user id.
      * @param integer $add 1/0 whether to add or to remove user permission.
+     * @throws \yii\web\HttpException only_root_remove_denied
      */
     public function actionChange($id, $user_id, $add)
     {
@@ -72,6 +74,10 @@ class AuthAssignmentController extends Controller
         if ($add) {
             Yii::$app->authManager->assign($authItem, $user_id);
         } else {
+            $rootCount = AuthAssignment::find()->where(['item_name' => $id])->count();
+            if ($id == 'root' && ! $rootCount < 2) {
+                throw new HttpException(403, Yii::t('access', 'only_root_remove_denied'));
+            }
             Yii::$app->authManager->revoke($authItem, $user_id);
         }
     }

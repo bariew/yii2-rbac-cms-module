@@ -33,6 +33,9 @@ class ViewAccess extends Object
      */
     public static function afterRender(ViewEvent $event)
     {
+        if (in_array(Yii::$app->controller->module->id, ['gii', 'debug'])) {
+            return;
+        }
         self::denyLinks($event);
     }
 

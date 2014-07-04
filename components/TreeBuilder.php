@@ -9,6 +9,9 @@ namespace bariew\rbacModule\components;
 
 use \bariew\nodeTree\ARTreeMenuWidget;
 use \bariew\nodeTree\SimpleTreeBehavior;
+use bariew\rbacModule\models\AuthItem;
+use bariew\rbacModule\models\AuthItemChild;
+use yii\helpers\ArrayHelper;
 
 /**
  * Generates jstree tree view from parent children nodes.
@@ -21,7 +24,7 @@ use \bariew\nodeTree\SimpleTreeBehavior;
  */
 class TreeBuilder extends SimpleTreeBehavior
 {
-    public $childrenAttribute = 'children';
+    public $childrenAttribute = 'childrenTree';
     /**
      * @inheritdoc
      */
@@ -56,7 +59,9 @@ class TreeBuilder extends SimpleTreeBehavior
             'delete'           => $contextMenu['items']['delete']
         ];
         $data['options']      = ['types' => $this->types, 'contextmenu' => $contextMenu];
-
+        $items = AuthItem::find()->indexBy('name')->all();
+        $relations = AuthItemChild::find()->all();
+        $data['items'] = $this->generateTree($items, $relations);
         return $data;
     }
 
@@ -67,7 +72,6 @@ class TreeBuilder extends SimpleTreeBehavior
      */
     public function checkboxCallback($data)
     {
-        $this->childrenAttribute = 'roles';
         $this->selectedNodes = $data['selected'];
         unset($data['selected']);
         $data['options'] = [
@@ -80,11 +84,13 @@ class TreeBuilder extends SimpleTreeBehavior
                 var url = data.node.a_attr.href.replace("access-roles/update", "assign/change")
                     + "&add=" + (data.action=="select_node" ? 1 : 0)
                     + "&user_id=" + ' . $_GET['id'] . ';
-                $.get(url);
+                $.ajax({url:url}).error(function(data){ alert(data.responseText); });
             }',
             'select_node.jstree' => 'function(){return false;} '
         ];
-
+        $items = AuthItem::find()->where(['type' => Item::TYPE_ROLE])->indexBy('name')->all();
+        $relations = AuthItemChild::find()->where(['parent' => array_keys($items)])->all();
+        $data['items'] = $this->generateTree($items, $relations);
         return $data;
     }
 
@@ -105,15 +111,36 @@ class TreeBuilder extends SimpleTreeBehavior
         return array(
             'id'       => $nodeId,
             'model'    => $model,
-            'children' => $model->{$this->childrenAttribute},
+            'children' => $model[$this->childrenAttribute],
             'text'     => $model['name'],
             'type'     => $model['type'] == 1 ? 'user' : 'flag',
-            'selected' => in_array($model->{$this->id}, $this->selectedNodes),
+            'selected' => in_array($model[$this->id], $this->selectedNodes),
             'a_attr'   => array(
                 'class'   => 'jstree-clicked',
                 'data-id' => $nodeId,
                 'href'    => $this->actionPath . "?{$this->id}={$id}&pid={$pid}"
             )
         );
+    }
+
+    /**
+     * Generates children tree.
+     * @param $items
+     * @param $relations
+     * @return array $items children tree.
+     */
+    public function generateTree($items, $relations)
+    {
+        $children = ArrayHelper::map($relations, 'child', 'parent');
+        foreach ($relations as $relation) {
+            if (!isset($items[$relation['child']]) || !isset($items[$relation['parent']])) {
+                continue;
+            }
+            $tree = $items[$relation['parent']]['childrenTree'];
+            $tree[] = &$items[$relation['child']];
+            $items[$relation['parent']]['childrenTree'] = $tree;
+        }
+
+        return array_diff_key($items, $children);
     }
 }
