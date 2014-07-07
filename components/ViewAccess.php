@@ -12,6 +12,7 @@ use yii\base\Object;
 use yii\base\ViewEvent;
 use bariew\rbacModule\helpers\UrlHelper;
 use bariew\rbacModule\models\AuthItem;
+use yii\console\Application;
 
 /**
  * Manages View access: removes restricted elements.
@@ -33,6 +34,9 @@ class ViewAccess extends Object
      */
     public static function afterRender(ViewEvent $event)
     {
+        if (get_class(Yii::$app) == Application::className()) {
+            return;
+        }
         if (in_array(Yii::$app->controller->module->id, ['gii', 'debug'])) {
             return;
         }
