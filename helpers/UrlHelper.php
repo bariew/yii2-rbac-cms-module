@@ -40,8 +40,12 @@ class UrlHelper extends Url
         $request = self::$_request ? self::$_request : (self::$_request = new Request());
         $request->setPathInfo($parsedUrl['path']);
         $rule = explode('/', Yii::$app->urlManager->parseRequest($request)[0]);
+
         if (count($rule) == 2) {
             array_unshift($rule, Yii::$app->id);
+        }
+        if (count($rule)!=3) {
+            return false;
         }
         return array_combine(['module', 'controller', 'action'], $rule);
     }

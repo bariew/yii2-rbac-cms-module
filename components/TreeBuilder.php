@@ -40,7 +40,7 @@ class TreeBuilder extends SimpleTreeBehavior
      */
     public function menuCallback($data)
     {
-        $contextMenu          = ARTreeMenuWidget::$commonOptions['contextmenu'];
+        $contextMenu          = ARTreeMenuWidget::this()->commonOptions()['contextmenu'];
         $contextMenu['items'] = [
             'createRole'       => [
                 "label"  => "<i class='glyphicon glyphicon-user' title='Create role'></i>",
@@ -118,7 +118,7 @@ class TreeBuilder extends SimpleTreeBehavior
             'a_attr'   => array(
                 'class'   => 'jstree-clicked',
                 'data-id' => $nodeId,
-                'href'    => $this->actionPath . "?{$this->id}={$id}&pid={$pid}"
+                'href'      => [$this->actionPath, $this->id => $id, 'pid'=> $pid]
             )
         );
     }
