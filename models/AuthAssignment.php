@@ -22,6 +22,18 @@ use yii\helpers\ArrayHelper;
  */
 class AuthAssignment extends ActiveRecord
 {
+    public static function userDefaultRoleAssignment($event)
+    {
+        return ($default = AuthItem::findOne('default'))
+            ? Yii::$app->authManager->assign($default, $event->sender->primaryKey)
+            : false;
+    }
+
+    public static function userRolesRemove($event)
+    {
+        return self::deleteAll(['user_id' => $event->sender->primaryKey]);
+    }
+
     /**
      * @inheritdoc
      */
@@ -93,22 +105,18 @@ class AuthAssignment extends ActiveRecord
         if (!$user = self::userInstance()) {
             return [];
         }
-
         foreach (['name', 'username', 'login', 'id'] as $attribute) {
             if ($user->hasAttribute($attribute)) {
-                $name = $attribute;
-                break;
+                return ArrayHelper::map($user::find()->all(), 'id', $attribute);
             }
         }
-        return isset($name)
-            ? ArrayHelper::map($user::find()->all(), 'id', $name)
-            : [];
+        return [];
     }
 
     public static function userInstance()
     {
         if (!isset(Yii::$app->user)) {
-            return [];
+            return false;
         }
         $className = Yii::$app->user->identityClass;
         return new $className();

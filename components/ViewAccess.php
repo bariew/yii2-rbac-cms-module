@@ -55,7 +55,7 @@ class ViewAccess extends Object
             if (self::checkHrefAccess($link->attr('href'))) {
                 continue;
             }
-            self::disableLink($link);
+            $link->remove();
         }
 
         foreach ($doc->find('li.dropdown') as $el) {
@@ -65,26 +65,6 @@ class ViewAccess extends Object
             }
         }
         $event->output = $doc;
-    }
-
-    /**
-     * Disables or removes link from phpQuery document.
-     * @param object $link phpQuery object
-     * @return boolean whether link is disabled.
-     */
-    public static function disableLink($link)
-    {
-        $href = $link->attr('href');
-        if (!$rule = UrlHelper::rule($href)) {
-            return false;
-        }
-        if (in_array($rule['action'], ['index', 'update', 'delete', 'create'])) {
-            $link->remove();
-        } else {
-            $link->addClass('disabled');
-            $link->attr('href', '#');
-        }
-        return true;
     }
 
     /**

@@ -39,8 +39,8 @@ class AuthItem extends ActiveRecord
      */
     public $childrenTree = [];
 
-    public static $userAccess = [];
-    public static $allPermissions = [];
+    public static $userAccess;
+    public static $allPermissions;
 
     public static function typeList()
     {
@@ -140,14 +140,13 @@ class AuthItem extends ActiveRecord
         if (isset(self::$userAccess[$user->id]['roles']['root'])) {
             //return true;
         }
-        if (!self::$allPermissions) {
+        if (self::$allPermissions === null) {
             self::$allPermissions = $auth->getPermissions();
         }
 
         if (!isset(self::$allPermissions[$permissionName])) {
             return true;
         }
-
         return $user->can($permissionName);
     }
 
