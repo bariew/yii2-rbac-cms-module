@@ -1,7 +1,9 @@
 <?php
 return [
     'menu'  => [
-        'label'    => 'Rbac',
-        'url' => ['/rbac/auth-item/index'],
+        'label'    => 'Settings',
+        'items' => [
+            ['label' => 'Rbac', 'url' => ['/rbac/auth-item/index']]
+        ]
     ]
 ];

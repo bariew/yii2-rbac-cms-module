@@ -138,14 +138,14 @@ class AuthItem extends ActiveRecord
         }
         $auth = Yii::$app->authManager;
         if (isset(self::$userAccess[$user->id]['roles']['root'])) {
-            //return true;
+            return true;
         }
         if (self::$allPermissions === null) {
             self::$allPermissions = $auth->getPermissions();
         }
 
         if (!isset(self::$allPermissions[$permissionName])) {
-            return true;
+            return false;
         }
         return $user->can($permissionName);
     }
