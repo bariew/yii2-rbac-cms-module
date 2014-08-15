@@ -23,11 +23,6 @@ use \yii\web\Response;
  */
 class AuthItemController extends Controller
 {
-    /**
-     *@inheritdoc
-     */
-    public $layout = '//menu';
-
     public $enableCsrfValidation = false;
     /**
      * Generates menu.
@@ -93,7 +88,7 @@ class AuthItemController extends Controller
             Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'model_success_saved_{id}'));
             return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
         }
-        return $this->render('_form', compact('model'));
+        return $this->render('form', compact('model'));
     }
     
     /**
@@ -117,7 +112,7 @@ class AuthItemController extends Controller
                 return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
             }
         }
-        return $this->render('_form', compact('model'));
+        return $this->render('form', compact('model'));
     }
     
     /**
@@ -127,7 +122,7 @@ class AuthItemController extends Controller
      * @param integer $pid parent id
      * @return \yii\web\View action view
      */
-    public function actionTreeDelete($id, $pid)
+    public function actionDelete($id, $pid)
     {
         $model =  $this->findModel($id);
         $oldParent = $this->findModel($pid);

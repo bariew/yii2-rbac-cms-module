@@ -37,22 +37,7 @@ class AuthAssignmentController extends Controller
     {
         return Yii::t('modules/rbac', 'title_roles_to_managers');
     }
-    
-    /**
-     * Renders manager permission AuthItem tree.
-     * @param integer $id manager id.
-     * @return mixed view
-     */
-    public function actionManagerPermissions($id)
-    {
-        $user = Manager::findOne($id);
-        $permissions = AuthAssignment::userAssignments($user)
-            ->select('name')->column();
-        $treeWidget = Html::tag("div", Yii::t('modules/rbac', 'manual_rbac_tree'), ['class' => 'manual'])
-            . AuthItem::findOne('root')
-            ->menuWidget(['selected'=>$permissions], 'checkboxCallback');
-        return $this->render('userPermissions', compact('treeWidget'));
-    }
+
 
     public function actionRoleUsers($name)
     {

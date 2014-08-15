@@ -1,10 +1,8 @@
-<?php
+<div class="row">
+    <div class="col-md-3 well">
+        <?= \Yii::$app->controller->menu; ?>
+    </div>
+    <div class="col-md-9">
 
-
-/**
- * @var yii\web\View $this
- * @var yii\data\ActiveDataProvider $dataProvider
- * @var bariew\rbacModule\models\search\AuthItemSearch $searchModel
- */
-
-
+    </div>
+</div>

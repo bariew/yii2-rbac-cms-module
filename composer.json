@@ -12,6 +12,7 @@
     ],
     "require"   : {
         "bariew/yii2-node-tree" : "2.0.*",
+        "kartik-v/yii2-widgets": "dev-master",
         "yiisoft/yii2-jui": "*"
     },
     "autoload": {
