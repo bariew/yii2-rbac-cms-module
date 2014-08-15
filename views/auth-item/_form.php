@@ -22,6 +22,9 @@ use \yii\helpers\Html;
               'attribute' => 'name',
               'clientOptions' => [
                   'source' => array_values($model::permissionList()),
+                  'delay' => 0,
+                  'autoFocus' => true,
+                  'minLength' => 0
               ],
         ]);
     }

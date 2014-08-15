@@ -145,7 +145,7 @@ class AuthItem extends ActiveRecord
         }
 
         if (!isset(self::$allPermissions[$permissionName])) {
-            return false;
+            return true;
         }
         return $user->can($permissionName);
     }
