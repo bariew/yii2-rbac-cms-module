@@ -3,6 +3,8 @@
 use yii\bootstrap\ActiveForm;
 use \yii\jui\AutoComplete;
 use \yii\helpers\Html;
+use \yii\rbac\Item;
+use bariew\rbacModule\models\AuthRule;
 /**
  * @var yii\web\View $this
  * @var bariew\rbacModule\models\AuthItem $model
@@ -11,10 +13,9 @@ use \yii\helpers\Html;
 
     $form = ActiveForm::begin();
 
-    if ($model->type == 1) {
+    if ($model->type == Item::TYPE_ROLE) {
         echo $form->field($model, 'name')->textInput();
     } else if ($model->isNewRecord) {
-
         echo Html::activeLabel($model, 'name')
         . '<br />'
         . AutoComplete::widget([
@@ -27,6 +28,10 @@ use \yii\helpers\Html;
                   'minLength' => 0
               ],
         ]);
+    }
+
+    if ($model->type == Item::TYPE_PERMISSION) {
+        echo $form->field($model, 'rule_name')->dropDownList(AuthRule::listAll(), ['prompt' => false]);
     }
 
     echo $form->field($model, 'description')->textarea(['rows' => 6]);

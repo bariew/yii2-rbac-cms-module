@@ -43,8 +43,7 @@ class AuthItem extends ActiveRecord
      */
     public $childrenTree = [];
 
-    public static $userAccess;
-    public static $allPermissions;
+    public static $userRoles;
 
     public static function defaultRoleList()
     {
@@ -105,19 +104,6 @@ class AuthItem extends ActiveRecord
         );
     }
 
-    /**
-     * Checks whether current user has access to current controller action.
-     * @param Event $event controller beforeAction event.
-     */
-    public static function checkActionAccess($event)
-    {
-        $controller = $event->sender;
-        $permissionName = self::createPermissionName([$controller->module->id, $controller->id, $controller->action->id]);
-        if (!self::checkAccess($permissionName, Yii::$app->user)) {
-            Yii::$app->session->setFlash('danger', Yii::t('modules/rbac', 'rbac_access_denied'));
-            $controller->redirect('/');
-        }
-    }
 
     /**
      * Creates valid permission name for controller action.
@@ -132,39 +118,35 @@ class AuthItem extends ActiveRecord
     protected static function setUserAccess($user_id)
     {
         Yii::$app->authManager->defaultRoles = AuthItemChild::childList(self::ROLE_DEFAULT);
-        self::$userAccess[$user_id] = [
-            'roles' => Yii::$app->authManager->getRolesByUser($user_id),
-            'permissions'   => Yii::$app->authManager->getPermissionsByUser($user_id)
-        ];
+        self::$userRoles[$user_id] = Yii::$app->authManager->getRolesByUser($user_id);
     }
+
     /**
      * Check whether the user has access to permission.
      * @param mixed $permissionName permission name or its components for self::createPermissionName.
      * @param mixed $user user
+     * @param array $params
      * @return boolean whether user has access to permission name.
      */
-    public static function checkAccess($permissionName, $user = false)
+    public static function checkAccess($permissionName, $user = false, $params = [])
     {
+        if (is_array($permissionName)) {
+            $permissionName = self::createPermissionName($permissionName);
+        }
         if (!$user) {
             $user = Yii::$app->user;
         }
         if ($user->isGuest && !Yii::$app->authManager->defaultRoles) {
             Yii::$app->authManager->defaultRoles = AuthItemChild::childList(self::ROLE_GUEST);
-        } else if (!isset(self::$userAccess[$user->id])) {
+        } else if (!isset(self::$userRoles[$user->id])) {
             self::setUserAccess($user->id);
         }
-        if (is_array($permissionName)) {
-            $permissionName = self::createPermissionName($permissionName);
-        }
-        $auth = Yii::$app->authManager;
-        if (isset(self::$userAccess[$user->id]['roles']['root'])) {
+
+        if (isset(self::$userRoles[$user->id][self::ROLE_ROOT])) {
             return true;
         }
-        if (self::$allPermissions === null) {
-            self::$allPermissions = $auth->getPermissions();
-        }
 
-        return $user->can($permissionName);
+        return $user->can($permissionName, $params);
     }
 
     /**
@@ -188,6 +170,7 @@ class AuthItem extends ActiveRecord
             [['created_at', 'updated_at', 'type'], 'integer'],
             [['description', 'data'], 'string'],
             [['name', 'rule_name'], 'string', 'max' => 64],
+            [['rule_name'], 'filter', 'filter' => function ($value) { return ($value) ? $value : null;}]
         ];
     }
 
@@ -344,6 +327,11 @@ class AuthItem extends ActiveRecord
     public function getId()
     {
         return $this->name;
+    }
+
+    public function getRuleName()
+    {
+        return $this->rule_name;
     }
 
     /**

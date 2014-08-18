@@ -22,18 +22,6 @@ use yii\helpers\ArrayHelper;
  */
 class AuthAssignment extends ActiveRecord
 {
-    public static function userDefaultRoleAssignment($event)
-    {
-        return ($default = AuthItem::findOne('default'))
-            ? Yii::$app->authManager->assign($default, $event->sender->primaryKey)
-            : false;
-    }
-
-    public static function userRolesRemove($event)
-    {
-        return self::deleteAll(['user_id' => $event->sender->primaryKey]);
-    }
-
     /**
      * @inheritdoc
      */

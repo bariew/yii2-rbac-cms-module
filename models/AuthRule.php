@@ -9,6 +9,7 @@ namespace bariew\rbacModule\models;
 
 use Yii;
 use \yii\db\ActiveRecord;
+use yii\rbac\Rule;
 
 /**
  * This is the model class for table "auth_rule".
@@ -22,6 +23,9 @@ use \yii\db\ActiveRecord;
  */
 class AuthRule extends ActiveRecord
 {
+    public $ruleClass;
+
+    public $rule;
     /**
      * @inheritdoc
      */
@@ -36,11 +40,31 @@ class AuthRule extends ActiveRecord
     public function rules()
     {
         return [
-            [['name'], 'required'],
-            [['data'], 'string'],
+            [['name', 'ruleClass'], 'required'],
+            [['ruleClass'], 'rulePathValidator'],
             [['created_at', 'updated_at'], 'integer'],
-            [['name'], 'string', 'max' => 64]
+            [['name', 'ruleClass'], 'string', 'max' => 64]
         ];
+    }
+
+    public function rulePathValidator($attribute)
+    {
+        $class = $this->$attribute;
+        if (!preg_match('/^.*\\.*$/', $class)) {
+            return $this->addError($attribute, 'Path must match "someAlias\...\className" pattern');
+        }
+        if (!class_exists($class)) {
+            return $this->addError($attribute, "Class does not exist");
+        }
+        /**
+         * @var Rule $rule
+         */
+        $rule = new $class();
+        if (!$rule instanceof Rule) {
+            return $this->addError($attribute, 'Rule must be instance of yii\rbac\Rule');
+        }
+        $rule->name = $this->name;
+        $this->rule = $rule;
     }
 
     /**
@@ -62,5 +86,27 @@ class AuthRule extends ActiveRecord
     public function getAuthItems()
     {
         return $this->hasMany(AuthItem::className(), ['rule_name' => 'name']);
+    }
+
+    public static function listAll()
+    {
+        $names = self::find()->select('name')->orderBy('name ASC')->column();
+        return array_combine($names, $names);
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+        $this->rule = unserialize($this->data);
+        $this->ruleClass = get_class($this->rule);
+    }
+
+    public function beforeSave($insert)
+    {
+        if (!parent::beforeSave($insert)) {
+            return false;
+        }
+        $this->data = serialize($this->rule);
+        return true;
     }
 }

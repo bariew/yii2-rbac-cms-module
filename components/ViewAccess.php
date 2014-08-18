@@ -29,27 +29,12 @@ use yii\console\Application;
 class ViewAccess extends Object
 {
     /**
-     * Runs access methods for view event.
-     * @param ViewEvent $event view event.
-     */
-    public static function afterRender(ViewEvent $event)
-    {
-        if (get_class(Yii::$app) == Application::className()) {
-            return;
-        }
-        if (in_array(Yii::$app->controller->module->id, ['gii', 'debug'])) {
-            return;
-        }
-        self::denyLinks($event);
-    }
-
-    /**
      * Checks whether links are available and removes/disables them.
-     * @param ViewEvent $event view event.
+     * @param ViewEvent $innerEvent view event.
      */
-    public static function denyLinks(ViewEvent $event)
+    public static function denyLinks($innerEvent)
     {
-        $doc = \phpQuery::newDocumentHTML($event->output);
+        $doc = \phpQuery::newDocumentHTML($innerEvent->output);
         foreach ($doc->find('a') as $el) {
             $link = pq($el);
             if (self::checkHrefAccess($link->attr('href'))) {
@@ -64,7 +49,7 @@ class ViewAccess extends Object
                 $li->remove();
             }
         }
-        $event->output = $doc;
+        $innerEvent->output = $doc;
     }
 
     /**

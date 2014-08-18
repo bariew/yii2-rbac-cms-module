@@ -1,9 +1,10 @@
 <?php
 return [
     'menu'  => [
-        'label'    => 'Settings',
+        'label'    => 'Auth',
         'items' => [
-            ['label' => 'Rbac', 'url' => ['/rbac/auth-item/index']]
+            ['label' => 'Roles & Permissions', 'url' => ['/rbac/auth-item/index']],
+            ['label' => 'Rules', 'url' => ['/rbac/auth-rule/index']],
         ]
     ]
 ];
