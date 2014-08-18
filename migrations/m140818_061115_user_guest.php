@@ -1,17 +1,20 @@
 <?php
 
-use \bariew\rbacModule\models\AuthItem;
-use \bariew\rbacModule\models\AuthItemChild;
+use yii\db\Schema;
 use yii\db\Migration;
+use bariew\rbacModule\models\AuthItem;
+use bariew\rbacModule\models\AuthItemChild;
 
-class m140723_145533_rbac_roles_add extends Migration
+class m140818_061115_user_guest extends Migration
 {
     public function getRoles()
     {
-        return [AuthItem::ROLE_ROOT, AuthItem::ROLE_DEFAULT];
+        return [
+            AuthItem::ROLE_GUEST
+        ];
     }
 
-    public function safeUp()
+    public function up()
     {
         foreach ($this->getRoles() as $role) {
             $this->insert(AuthItem::tableName(), [
@@ -21,12 +24,11 @@ class m140723_145533_rbac_roles_add extends Migration
         }
         $this->insert(AuthItemChild::tableName(), [
             'parent'  => AuthItem::ROLE_ROOT,
-            'child'   => AuthItem::ROLE_DEFAULT
+            'child'   => AuthItem::ROLE_GUEST
         ]);
-        return true;
     }
 
-    public function safeDown()
+    public function down()
     {
         AuthItemChild::deleteAll(['parent' => $this->getRoles()]);
         AuthItemChild::deleteAll(['child' => $this->getRoles()]);

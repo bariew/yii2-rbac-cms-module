@@ -38,8 +38,18 @@ class AuthItemChild extends ActiveRecord
     public static function permissionList()
     {
         return AuthItem::permissionList();
-    }    
-    
+    }
+
+    /**
+     * Gets list of all children name for the parent.
+     * @param string $parent parent name.
+     * @return array child list.
+     */
+    public static function childList($parent)
+    {
+        return self::find()->where(compact('parent'))->select('child')->column();
+    }
+
     /**
      * @inheritdoc
      */

@@ -34,6 +34,10 @@ use yii\helpers\ArrayHelper;
  */
 class AuthItem extends ActiveRecord
 {
+    const ROLE_ROOT = 'root';
+    const ROLE_DEFAULT = 'default';
+    const ROLE_GUEST = 'guest';
+
     /**
      * @var array container for autItem tree for menu widget.
      */
@@ -41,6 +45,21 @@ class AuthItem extends ActiveRecord
 
     public static $userAccess;
     public static $allPermissions;
+
+    public static function defaultRoleList()
+    {
+        return [
+            self::ROLE_ROOT => Yii::t('modules/rbac', 'role_root'),
+            self::ROLE_DEFAULT => Yii::t('modules/rbac', 'role_default'),
+            self::ROLE_GUEST => Yii::t('modules/rbac', 'role_guest'),
+        ];
+    }
+
+    public function isDefaultRole($role)
+    {
+        return in_array($role, array_keys(self::defaultRoleList()));
+    }
+
 
     public static function typeList()
     {
@@ -69,13 +88,11 @@ class AuthItem extends ActiveRecord
                     $actions[] = self::getRouteName($matches[1]);
                 }
                 foreach ($actions as $action) {
-                    $rule = [$module->id, $controller->id, $action];
-                    $permission = self::createPermissionName($rule);
-                    $result[$permission] = Yii::$app->urlManager->createUrl([implode('/', $rule)]);
+                    $result[] = self::createPermissionName([$module->id, $controller->id, $action]);
                 }
             }
         }
-        array_multisort($result);
+        asort($result);
         return $result;
     }
 
@@ -109,11 +126,12 @@ class AuthItem extends ActiveRecord
      */
     public static function createPermissionName($data)
     {
-        return implode('_', $data);
+        return implode('/', $data);
     }
 
     protected static function setUserAccess($user_id)
     {
+        Yii::$app->authManager->defaultRoles = AuthItemChild::childList(self::ROLE_DEFAULT);
         self::$userAccess[$user_id] = [
             'roles' => Yii::$app->authManager->getRolesByUser($user_id),
             'permissions'   => Yii::$app->authManager->getPermissionsByUser($user_id)
@@ -130,7 +148,9 @@ class AuthItem extends ActiveRecord
         if (!$user) {
             $user = Yii::$app->user;
         }
-        if (!isset(self::$userAccess[$user->id])) {
+        if ($user->isGuest && !Yii::$app->authManager->defaultRoles) {
+            Yii::$app->authManager->defaultRoles = AuthItemChild::childList(self::ROLE_GUEST);
+        } else if (!isset(self::$userAccess[$user->id])) {
             self::setUserAccess($user->id);
         }
         if (is_array($permissionName)) {
@@ -144,9 +164,6 @@ class AuthItem extends ActiveRecord
             self::$allPermissions = $auth->getPermissions();
         }
 
-        if (!isset(self::$allPermissions[$permissionName])) {
-            return true;
-        }
         return $user->can($permissionName);
     }
 
@@ -166,11 +183,19 @@ class AuthItem extends ActiveRecord
         return [
             [['name'], 'required'],
             [['name'], 'unique'],
+            [['name'], 'defaultRoleRenameRule'],
             [['type'], 'default', 'value' => Item::TYPE_ROLE],
             [['created_at', 'updated_at', 'type'], 'integer'],
             [['description', 'data'], 'string'],
             [['name', 'rule_name'], 'string', 'max' => 64],
         ];
+    }
+
+    public function defaultRoleRenameRule($attribute)
+    {
+        if ($this->isAttributeChanged($attribute) && $this->isDefaultRole(@$this->oldAttributes['name'])) {
+            return $this->addError($attribute, Yii::t('modules/rbac', 'default_role_renaming_error'));
+        }
     }
 
     /**
@@ -329,8 +354,8 @@ class AuthItem extends ActiveRecord
         if (!parent::beforeDelete()) {
             return false;
         }
-        if ($this->name == 'root') {
-            throw new HttpException(403, Yii::t('modules/rbac', 'delete_error'));
+        if ($this->isDefaultRole($this->name)) {
+            throw new HttpException(403, Yii::t('modules/rbac', 'default_role_delete_error'));
         }
         foreach ($this->getChildren()->all() as $item) {
             $this->removeChild($item);

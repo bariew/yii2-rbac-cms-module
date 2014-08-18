@@ -8,6 +8,7 @@
 namespace bariew\rbacModule\controllers;
 use bariew\rbacModule\models\AuthItem;
 use Yii;
+use yii\rbac\Item;
 use yii\web\Controller;
 use yii\helpers\Html;
 use \yii\web\NotFoundHttpException;
@@ -62,11 +63,7 @@ class AuthItemController extends Controller
         $pid = Yii::$app->request->get('pid');
         $model = $this->findModel($id);
         $parent = $pid ? $this->findModel($pid) : $model;
-        if ($model->load(\Yii::$app->request->post())) {
-            if (!$model->save() && Yii::$app->request->isAjax) {
-                Yii::$app->response->format = Response::FORMAT_JSON;
-                return $model->getErrors();               
-            }
+        if ($model->load(\Yii::$app->request->post()) && $model->save()) {
             Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'model_success_saved_{id}'));
             return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
         }
@@ -82,7 +79,7 @@ class AuthItemController extends Controller
     {
         $parent = $this->findModel($id);
         $model =  $this->findModel();
-        $model->type = 1;
+        $model->type = Item::TYPE_ROLE;
         if ($model->load(\Yii::$app->request->post()) && $model->save()) {
             $parent->addChild($model);
             Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'model_success_saved_{id}'));
@@ -100,17 +97,11 @@ class AuthItemController extends Controller
     {
         $parent = $this->findModel($id);
         $model = $this->findModel();
-        $model->type = 2;
-        if ($model->load(\Yii::$app->request->post())) {
-            if (!$child = AuthItem::findOne(['name'=>$model->name])) {
-                $child = $model;
-            }
-
-            if (!$child->isNewRecord || $child->save()) {
-                $parent->addChild($child);
-                Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'model_success_saved_{id}'));
-                return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
-            }
+        $model->type = Item::TYPE_PERMISSION;
+        if ($model->load(\Yii::$app->request->post()) && $model->save()) {
+            $parent->addChild($model);
+            Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'model_success_saved_{id}'));
+            return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
         }
         return $this->render('form', compact('model'));
     }
