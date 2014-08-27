@@ -5,12 +5,12 @@
     <div class="col-md-9">
     <?php
     $items = [[
-        'label' => 'Settings',
+        'label' => Yii::t('modules/rbac', 'Settings'),
         'content' => $this->render('_form', compact('model')),
     ]];
     if (!$model->isNewRecord) {
         $items[] = [
-            'label' => 'Users',
+            'label' => Yii::t('modules/rbac', 'Users'),
             'url' => ['auth-assignment/role-users', 'name'=>$model->name],
             'visible'   => false
         ];

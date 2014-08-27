@@ -63,8 +63,8 @@ class AuthItemController extends Controller
         $pid = Yii::$app->request->get('pid');
         $model = $this->findModel($id);
         $parent = $pid ? $this->findModel($pid) : $model;
-        if ($model->load(\Yii::$app->request->post()) && $model->save()) {
-            Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'model_success_saved_{id}'));
+        if ($model->load(\Yii::$app->request->post()) && $model->updateItem()) {
+            Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'Saved'));
             return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
         }
         return $this->render('form', compact('model'));
@@ -80,9 +80,9 @@ class AuthItemController extends Controller
         $parent = $this->findModel($id);
         $model =  $this->findModel();
         $model->type = Item::TYPE_ROLE;
-        if ($model->load(\Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(\Yii::$app->request->post()) && $model->addItem()) {
             $parent->addChild($model);
-            Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'model_success_saved_{id}'));
+            Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'Role saved'));
             return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
         }
         return $this->render('form', compact('model'));
@@ -98,9 +98,9 @@ class AuthItemController extends Controller
         $parent = $this->findModel($id);
         $model = $this->findModel();
         $model->type = Item::TYPE_PERMISSION;
-        if ($model->load(\Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(\Yii::$app->request->post()) && $model->addItem()) {
             $parent->addChild($model);
-            Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'model_success_saved_{id}'));
+            Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'Permission saved'));
             return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
         }
         return $this->render('form', compact('model'));
@@ -110,17 +110,12 @@ class AuthItemController extends Controller
      * Detaches model from parent. 
      * And deletes model if there's no more parents.
      * @param integer $id mode id
-     * @param integer $pid parent id
      * @return \yii\web\View action view
      */
-    public function actionDelete($id, $pid)
+    public function actionDelete($id)
     {
         $model =  $this->findModel($id);
-        $oldParent = $this->findModel($pid);
-        $oldParent->removeChild($model);
-        if (!$model->parents) {
-            $model->delete();
-        }
+        $model->delete();
     }
     
     /**
@@ -136,19 +131,6 @@ class AuthItemController extends Controller
         $oldParent = $this->findModel($pid);
         $newParent = $this->findModel(Yii::$app->request->post('pid'));
         $child->move($oldParent, $newParent);
-        echo json_encode($child->nodeAttributes($child, $newParent->id, time()));
-    }
-    
-    /**
-     * Attaches model to new parent. 
-     * @param integer $id mode id
-     * @return \yii\web\View action view
-     */
-    public function actionTreeCopy($id)
-    {
-        $child = $this->findModel($id);
-        $newParent = $this->findModel(Yii::$app->request->post('pid'));
-        $newParent->addChild($child);
         echo json_encode($child->nodeAttributes($child, $newParent->id, time()));
     }
     

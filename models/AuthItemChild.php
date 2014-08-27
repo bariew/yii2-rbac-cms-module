@@ -75,8 +75,8 @@ class AuthItemChild extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'parent' => Yii::t('modules/rbac', 'rbac_role'),
-            'child'  => Yii::t('modules/rbac', 'rbac_permission'),
+            'parent' => Yii::t('modules/rbac', 'Role'),
+            'child'  => Yii::t('modules/rbac', 'Permission'),
         ];
     }
 

@@ -22,7 +22,7 @@ class m140818_061115_user_guest extends Migration
                 'type'  => \yii\rbac\Item::TYPE_ROLE
             ]);
         }
-        $this->insert(AuthItemChild::tableName(), [
+        return $this->insert(AuthItemChild::tableName(), [
             'parent'  => AuthItem::ROLE_ROOT,
             'child'   => AuthItem::ROLE_GUEST
         ]);

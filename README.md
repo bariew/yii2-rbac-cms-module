@@ -53,3 +53,5 @@ Usage
 3. Use AuthItem::checkAccess() for beforeAction events and ViewAccess::afterRender for afterRender event.
 You may also use Yii::$app->authManager in common way.
 
+* In the module migration folder you may see some migration files - they are required to run for module work ()
+

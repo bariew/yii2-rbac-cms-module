@@ -73,10 +73,12 @@ class AuthRule extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'name'       => Yii::t('modules/rbac', 'name'),
-            'data'       => Yii::t('modules/rbac', 'data'),
-            'created_at' => Yii::t('modules/rbac', 'created_at'),
-            'updated_at' => Yii::t('modules/rbac', 'updated_at'),
+            'name'       => Yii::t('modules/rbac', 'Name'),
+            'ruleClass' => Yii::t('modules/rbac', 'Rule full class name'),
+            'data'       => Yii::t('modules/rbac', 'Data'),
+            'created_at' => Yii::t('modules/rbac', 'Created at'),
+            'updated_at' => Yii::t('modules/rbac', 'Updated at'),
+
         ];
     }
 

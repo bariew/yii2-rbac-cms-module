@@ -188,12 +188,12 @@ class AuthItem extends ActiveRecord
     {
         return [
             'name' => self::typeList()[$this->type],
-            'type' => Yii::t('modules/rbac', 'type'),
-            'description' => Yii::t('modules/rbac', 'description'),
-            'rule_name' => Yii::t('modules/rbac', 'rbac_rule_name'),
-            'data' => Yii::t('modules/rbac', 'data'),
-            'created_at' => Yii::t('modules/rbac', 'created_at'),
-            'updated_at' => Yii::t('modules/rbac', 'updated_at'),
+            'type' => Yii::t('modules/rbac', 'Type'),
+            'description' => Yii::t('modules/rbac', 'Description'),
+            'rule_name' => Yii::t('modules/rbac', 'Rule name'),
+            'data' => Yii::t('modules/rbac', 'Data'),
+            'created_at' => Yii::t('modules/rbac', 'Created at'),
+            'updated_at' => Yii::t('modules/rbac', 'Updated at'),
         ];
     }
 
@@ -265,41 +265,6 @@ class AuthItem extends ActiveRecord
     }
 
     /**
-     * Detaches this model from its old parent
-     * and attaches to the new one.
-     * @param AuthItem $oldParent item
-     * @param AuthItem $newParent item
-     * @return boolean whether model has been moved.
-     */
-    public function move($oldParent, $newParent)
-    {
-        return $oldParent->removeChild($this)
-            ? $newParent->addChild($this)
-            : false;
-    }
-
-    /**
-     * Attaches child related to this model by AuthItemChild.
-     * @param AuthItem $item child.
-     * @return integer whether child is attached.
-     */
-    public function addChild(AuthItem $item)
-    {
-        return Yii::$app->authManager->addChild($this, $item);
-    }
-
-    /**
-     * Detaches child related to this model by AuthItemChild.
-     * @param AuthItem $item child.
-     * @return integer whether child is detached.
-     */
-    public function removeChild($item)
-    {
-        return Yii::$app->authManager->removeChild($this, $item);
-    }
-
-
-    /**
      * @return \yii\db\ActiveQuery
      */
     public function getAuthAssignments()
@@ -334,6 +299,65 @@ class AuthItem extends ActiveRecord
         return $this->rule_name;
     }
 
+    public function getItem()
+    {
+        return new Item([
+            'ruleName' => $this->rule_name,
+            'createdAt'=> $this->created_at,
+            'updatedAt'=> $this->updated_at,
+            'name'      => $this->name,
+            'type'      => $this->type,
+            'description'=>$this->description,
+            'data'      => $this->data
+        ]);
+    }
+
+    public function addItem()
+    {
+        if (!$this->validate()) {
+            return false;
+        }
+        return Yii::$app->authManager->add($this->getItem());
+    }
+
+    public function updateItem()
+    {
+        return Yii::$app->authManager->update($this->oldAttributes['name'], $this->getItem());
+    }
+    /**
+     * Detaches this model from its old parent
+     * and attaches to the new one.
+     * @param AuthItem $oldParent item
+     * @param AuthItem $newParent item
+     * @return boolean whether model has been moved.
+     */
+    public function move($oldParent, $newParent)
+    {
+        return $oldParent->removeChild($this)
+            ? $newParent->addChild($this)
+            : false;
+    }
+
+    /**
+     * Attaches child related to this model by AuthItemChild.
+     * @param AuthItem $item child.
+     * @return integer whether child is attached.
+     */
+    public function addChild(AuthItem $item)
+    {
+        return Yii::$app->authManager->addChild($this, $item);
+    }
+
+    /**
+     * Detaches child related to this model by AuthItemChild.
+     * @param AuthItem $item child.
+     * @return integer whether child is detached.
+     */
+    public function removeChild($item)
+    {
+        return Yii::$app->authManager->removeChild($this, $item);
+    }
+
     /**
      * @inheritdoc
      */
@@ -345,12 +369,6 @@ class AuthItem extends ActiveRecord
         if ($this->isDefaultRole($this->name)) {
             throw new HttpException(403, Yii::t('modules/rbac', 'default_role_delete_error'));
         }
-        foreach ($this->getChildren()->all() as $item) {
-            $this->removeChild($item);
-        }
-        foreach ($this->getParents()->all() as $item) {
-            $item->removeChild($this);
-        }
-        return true;
+        return Yii::$app->authManager->remove($this->getItem());
     }
 }

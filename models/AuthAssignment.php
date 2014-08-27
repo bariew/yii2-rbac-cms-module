@@ -48,9 +48,9 @@ class AuthAssignment extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'item_name'  => Yii::t('modules/rbac', 'rbac_role'),
-            'user_id'    => Yii::t('modules/rbac', 'manager_id'),
-            'created_at' => Yii::t('modules/rbac', 'created_at'),
+            'item_name'  => Yii::t('modules/rbac', 'Role'),
+            'user_id'    => Yii::t('modules/rbac', 'User ID'),
+            'created_at' => Yii::t('modules/rbac', 'Created at'),
         ];
     }
 
