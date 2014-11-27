@@ -14,6 +14,16 @@ namespace bariew\rbacModule;
  */
 class Module extends \yii\base\Module
 {
+    public $params = [
+        'menu'  => [
+            'label'    => 'Auth',
+            'items' => [
+                ['label' => 'Roles & Permissions', 'url' => ['/rbac/auth-item/index']],
+                ['label' => 'Rules', 'url' => ['/rbac/auth-rule/index']],
+            ]
+        ]
+    ];
+
     /**
      * @inheritdoc
      */
