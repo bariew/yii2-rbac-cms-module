@@ -7,15 +7,14 @@
 
 namespace bariew\rbacModule\models;
 
+use app\controllers\SiteController;
 use Yii;
-use yii\base\Event;
 use yii\helpers\FileHelper;
 use \yii\rbac\Item;
 use yii\db\ActiveRecord;
 use \bariew\rbacModule\components\TreeBuilder;
 use \yii\behaviors\TimestampBehavior;
 use \yii\web\HttpException;
-use yii\helpers\ArrayHelper;
 
 /**
  * Модель управления ролями пользователей.
@@ -71,6 +70,12 @@ class AuthItem extends ActiveRecord
     public static function permissionList()
     {
         $result = [];
+
+        $controller = new SiteController('site', Yii::$app->controller->module);
+        foreach (self::controllerActions($controller) as $action) {
+            $result[] = self::createPermissionName(['app', $controller->id, $action]);
+        }
+
         foreach (Yii::$app->modules as $name => $config) {
             $module = Yii::$app->getModule($name);
             $controllerFiles = FileHelper::findFiles($module->controllerPath);
@@ -78,21 +83,28 @@ class AuthItem extends ActiveRecord
                 $name = preg_replace('/.*\/(\w+)Controller\.php$/', '$1', $file);
                 $id = self::getRouteName($name);
                 $controller = $module->createControllerByID($id);
-                $actions = array_keys($controller->actions());
-                $reflection = new \ReflectionClass($controller);
-                foreach ($reflection->getMethods() as $method) {
-                    if (!preg_match('/action([A-Z].*)/', $method->name, $matches)) {
-                        continue;
-                    }
-                    $actions[] = self::getRouteName($matches[1]);
-                }
-                foreach ($actions as $action) {
+                foreach (self::controllerActions($controller) as $action) {
                     $result[] = self::createPermissionName([$module->id, $controller->id, $action]);
                 }
             }
         }
+
+
         asort($result);
         return $result;
+    }
+
+    private static function controllerActions(\yii\base\Controller $controller)
+    {
+        $actions = array_keys($controller->actions());
+        $reflection = new \ReflectionClass($controller);
+        foreach ($reflection->getMethods() as $method) {
+            if (!preg_match('/action([A-Z].*)/', $method->name, $matches)) {
+                continue;
+            }
+            $actions[] = self::getRouteName($matches[1]);
+        }
+        return $actions;
     }
 
     public static function getRouteName($string)

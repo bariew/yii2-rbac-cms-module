@@ -14,6 +14,7 @@ use bariew\rbacModule\models\AuthItem;
 use yii\base\Event;
 use yii\base\ViewEvent;
 use Yii;
+use yii\console\Application;
 use yii\web\Controller;
 use yii\web\HttpException;
 
