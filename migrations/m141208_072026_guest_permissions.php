@@ -31,7 +31,7 @@ class m141208_072026_guest_permissions extends Migration
                     'type'  => \yii\rbac\Item::TYPE_PERMISSION
                 ]);
                 $this->insert(AuthItemChild::tableName(), [
-                    'parent'  => AuthItem::ROLE_GUEST,
+                    'parent'  => $role,
                     'child'   => $permission
                 ]);
             }
