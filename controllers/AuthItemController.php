@@ -126,8 +126,11 @@ class AuthItemController extends Controller
         $child->move($oldParent, $newParent);
         echo json_encode($child->nodeAttributes($child, $newParent->id, time()));
     }
+
     /**
-     * @inheritdoc
+     * @param bool $id
+     * @throws NotFoundHttpException
+     * @return AuthItem
      */
     protected function findModel($id = false)
     {

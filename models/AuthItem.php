@@ -129,6 +129,9 @@ class AuthItem extends ActiveRecord
 
     protected static function setUserAccess($user_id)
     {
+        if (!$user_id) {
+            return;
+        }
         Yii::$app->authManager->defaultRoles = AuthItemChild::childList(self::ROLE_DEFAULT);
         self::$userRoles[$user_id] = Yii::$app->authManager->getRolesByUser($user_id);
     }
@@ -148,6 +151,7 @@ class AuthItem extends ActiveRecord
         if (!$user) {
             $user = Yii::$app->user;
         }
+
         if ($user->isGuest && !Yii::$app->authManager->defaultRoles) {
             Yii::$app->authManager->defaultRoles = AuthItemChild::childList(self::ROLE_GUEST);
         } else if (!isset(self::$userRoles[$user->id])) {
@@ -176,7 +180,6 @@ class AuthItem extends ActiveRecord
     {
         return [
             [['name'], 'required'],
-            [['name'], 'unique'],
             [['name'], 'defaultRoleRenameRule'],
             [['type'], 'default', 'value' => Item::TYPE_ROLE],
             [['created_at', 'updated_at', 'type'], 'integer'],
@@ -328,6 +331,12 @@ class AuthItem extends ActiveRecord
     {
         if (!$this->validate()) {
             return false;
+        }
+        if ($this->findOne([
+            'name' => $this->name,
+            'type' => $this->type
+        ])) {
+            return true;
         }
         return Yii::$app->authManager->add($this->getItem());
     }
