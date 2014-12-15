@@ -48,19 +48,16 @@ class Module extends \yii\base\Module
 
     public function install($moduleName)
     {
-        if ($id = \Yii::$app->user->id) {
-           return $this->setRootUser($id);
+        $identity = \Yii::$app->user->identityClass;
+        if ($identity && ($id = \Yii::$app->user->id)) {
+            return $this->setRootUser($id);
         }
 
         $url = Html::a("link", Url::toRoute(["/{$moduleName}/auth-item/update", "id"=>"root", "pid"=>""]));
         /**
          * @var ActiveRecord $identity
          */
-        if (
-            ($identity = \Yii::$app->user->identityClass)
-            && class_exists($identity)
-            && ($identity::find()->count())
-        ) {
+        if ($identity && class_exists($identity) && ($identity::find()->count())) {
             $id = $identity::find()->orderBy([$identity::primaryKey() => SORT_ASC])->one()->primaryKey;
             $this->setRootUser($id);
             $message = \Yii::t('modules/rbac', 'Root attached to first user. You may attach Root role manually: '.$url);
