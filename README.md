@@ -31,7 +31,7 @@ to the require section of your `composer.json` file.
 Usage
 -----
 
-1. Define authManager component in main config components section, you'll need some i18n settings too (example):
+* Define authManager component in main config components section, you'll need some i18n settings too (example):
 ```
     'components' => [
     ...
@@ -47,7 +47,8 @@ Usage
         ],
     ],
 ```
-2. Include 'rbac' module in modules config section:
+
+* Include 'rbac' module in modules config section:
 ```
     'modules' => [
     ...
@@ -56,8 +57,11 @@ Usage
         ],
     ],
 ```
-3. Apply migrations from module migrations folder. E.g. you may copy those migrations to your application migrations folder and run
+
+* Apply migrations from module migrations folder. E.g. you may copy those migrations to your application migrations folder and run
     common yii console migration command.
-4. Go to rbac/auth-item/index URL and create some roles and permissions, using menu tree with right mouse button.
-5. Use AuthItem::checkAccess() for beforeAction events and ViewAccess::afterRender() for afterRender event.
+
+* Go to rbac/auth-item/index URL and create some roles and permissions, using menu tree with right mouse button.
+
+* Use AuthItem::checkAccess() for beforeAction events and ViewAccess::afterRender() for afterRender event.
 You may also use Yii::$app->authManager in common way.
