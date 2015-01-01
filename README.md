@@ -38,7 +38,7 @@ Usage
         'authManager'   => [
             'class' => '\yii\rbac\DbManager'
         ],
-        'i18n' => [
+        'i18n' => [ // this example only if you don't have i18n defined in any other way.
             'translations' => [
                 '*' => [
                     'class' => 'yii\i18n\PhpMessageSource',
@@ -48,10 +48,20 @@ Usage
     ],
 ```
 
-2. Go to rbac/auth-item/index URL and create some roles and permissions, using menu tree with right mouse button.
+2. Include 'rbac' module in modules config section:
+```
+    'modules' => [
+    ...
+        'rbac'   => [
+            'class' => 'bariew\rbacModule\Module'
+        ],
+    ],
+```
 
-3. Use AuthItem::checkAccess() for beforeAction events and ViewAccess::afterRender for afterRender event.
+3. Apply migrations from module migrations folder. E.g. you may copy those migrations to your application migrations folder and run
+    common yii console migration command.
+
+4. Go to rbac/auth-item/index URL and create some roles and permissions, using menu tree with right mouse button.
+
+5. Use AuthItem::checkAccess() for beforeAction events and ViewAccess::afterRender() for afterRender event.
 You may also use Yii::$app->authManager in common way.
-
-* In the module migration folder you may see some migration files - they are required to run for module work ()
-
