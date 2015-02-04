@@ -48,7 +48,11 @@ class Module extends \yii\base\Module
 
     public function install($moduleName)
     {
-        $identity = \Yii::$app->user->identityClass;
+        try {
+            $identity = \Yii::$app->user->identityClass;
+        } catch (\Exception $e) {
+            $identity = null;
+        }
         if ($identity && ($id = \Yii::$app->user->id)) {
             return $this->setRootUser($id);
         }
