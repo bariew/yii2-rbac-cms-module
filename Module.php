@@ -35,17 +35,6 @@ class Module extends \yii\base\Module
      */
     public $controllerNamespace = 'bariew\rbacModule\controllers';
 
-    /**
-     * @inheritdoc
-     */
-    public function init()
-    {
-        \Yii::$app->cache->flush();
-        parent::init();
-
-        // custom initialization code goes here
-    }
-
     public function install($moduleName)
     {
         try {
