@@ -5,9 +5,10 @@ use \yii\jui\AutoComplete;
 use \yii\helpers\Html;
 use \yii\rbac\Item;
 use bariew\rbacModule\models\AuthRule;
+use bariew\rbacModule\models\AuthItem;
 /**
  * @var yii\web\View $this
- * @var bariew\rbacModule\models\AuthItem $model
+ * @var AuthItem $model
  * @var yii\widgets\ActiveForm $form
  */
 

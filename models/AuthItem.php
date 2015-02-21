@@ -76,12 +76,14 @@ class AuthItem extends ActiveRecord
             $result[] = self::createPermissionName(['app', $controller->id, $action]);
         }
 
-        foreach (Yii::$app->modules as $name => $config) {
-            $module = Yii::$app->getModule($name);
+        foreach (Yii::$app->modules as $moduleName => $config) {
+            $module = Yii::$app->getModule($moduleName);
             $controllerFiles = FileHelper::findFiles($module->controllerPath);
             foreach ($controllerFiles as $file) {
-                $name = preg_replace('/.*\/(\w+)Controller\.php$/', '$1', $file);
-                $id = self::getRouteName($name);
+                if (!preg_match('/.*\/(\w+)Controller\.php$/', $file, $matches)) {
+                    continue;
+                }
+                $id = self::getRouteName($matches[1]);
                 $controller = $module->createControllerByID($id);
                 foreach (self::controllerActions($controller) as $action) {
                     $result[] = self::createPermissionName([$module->id, $controller->id, $action]);
@@ -96,10 +98,14 @@ class AuthItem extends ActiveRecord
 
     private static function controllerActions(\yii\base\Controller $controller)
     {
-        $actions = array_keys($controller->actions());
+        try {
+            $actions = array_keys($controller->actions());
+        } catch (\Exception $e) {
+            $actions = [];
+        }
         $reflection = new \ReflectionClass($controller);
         foreach ($reflection->getMethods() as $method) {
-            if (!preg_match('/action([A-Z].*)/', $method->name, $matches)) {
+            if (!preg_match('/^action([A-Z].*)/', $method->name, $matches)) {
                 continue;
             }
             $actions[] = self::getRouteName($matches[1]);
