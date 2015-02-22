@@ -43,10 +43,10 @@ class ViewAccess extends Object
             $link->remove();
         }
 
-        foreach ($doc->find('li.dropdown') as $el) {
-            $li = pq($el);
-            if (!$li->find('a[href]')->length) {
-                $li->remove();
+        foreach ($doc->find('ul.dropdown-menu') as $el) {
+            $ul = pq($el);
+            if (!$ul->find('a[href!="#"]')->length) { 
+                $ul->parent('li.dropdown')->addClass('hide');
             }
         }
         $innerEvent->output = $doc;
