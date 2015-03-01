@@ -36,12 +36,9 @@ class AuthItemChild extends ActiveRecord
     public static function permissionList()
     {
         $result = [];
-        $controller = new SiteController('site', Yii::$app->controller->module);
-        foreach (self::controllerActions($controller) as $action) {
-            $result['app'][$controller->id][$action] = AuthItem::createPermissionName(['app', $controller->id, $action]);
-        }
-        foreach (Yii::$app->modules as $moduleName => $config) {
-            $module = Yii::$app->getModule($moduleName);
+        $modules = array_merge([Yii::$app], \Yii::$app->modules);
+        foreach ($modules as $moduleName => $data) {
+            $module = is_object($data) ? $data : Yii::$app->getModule($moduleName);
             $controllerFiles = FileHelper::findFiles($module->controllerPath);
             foreach ($controllerFiles as $file) {
                 if (!preg_match('/.*\/(\w+)Controller\.php$/', $file, $matches)) {
@@ -50,21 +47,18 @@ class AuthItemChild extends ActiveRecord
                 $id = self::getRouteName($matches[1]);
                 $controller = $module->createControllerByID($id);
                 foreach (self::controllerActions($controller) as $action) {
-                    $result[$moduleName][$controller->id][$action] 
+                    $result[$module->id][$controller->id][$action] 
                         = AuthItem::createPermissionName([$module->id, $controller->id, $action]);
                 }
             }
         }
+        ksort($result);
         return $result;
     }
 
     private static function controllerActions(\yii\base\Controller $controller)
     {
-        try {
-            $actions = array_keys($controller->actions());
-        } catch (\Exception $e) {
-            $actions = [];
-        }
+        $actions = array_keys($controller->actions());
         $reflection = new \ReflectionClass($controller);
         foreach ($reflection->getMethods() as $method) {
             if (!preg_match('/^action([A-Z].*)/', $method->name, $matches)) {
