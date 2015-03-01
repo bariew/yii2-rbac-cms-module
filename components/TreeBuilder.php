@@ -42,54 +42,14 @@ class TreeBuilder extends SimpleTreeBehavior
     {
         $contextMenu          = ARTreeMenuWidget::this()->commonOptions()['contextmenu'];
         $contextMenu['items'] = [
-            'createRole'       => [
-                "label"  => "<i class='glyphicon glyphicon-user' title='Create role'></i>",
-                "action" => 'function(obj){
-                    var url = replaceTreeUrl($(obj.reference[0]).attr("href"), "tree-create-role");
-                    window.location.href = url;
-                }'
-            ],
-            'createPermission' => [
-                "label"  => "<i class='glyphicon glyphicon-flag' title='Create permission'></i>",
-                "action" => 'function(obj){
-                    var url = replaceTreeUrl($(obj.reference[0]).attr("href"), "tree-create-permission");
-                    window.location.href = url;
-                }'
-            ],
-            'delete'           => $contextMenu['items']['delete']
+            'create' => $contextMenu['items']['create'],
+            'delete' => $contextMenu['items']['delete']
         ];
         $data['options']      = ['types' => $this->types, 'contextmenu' => $contextMenu];
-        $items = AuthItem::find()->indexBy('name')->all();
+        $items = AuthItem::find()
+            ->where(['type' => \yii\rbac\Item::TYPE_ROLE])
+            ->indexBy('name')->all();
         $relations = AuthItemChild::find()->all();
-        $data['items'] = $this->generateTree($items, $relations);
-        return $data;
-    }
-
-    /**
-     * Callback for $this->menuWidget() method.
-     * @param array $data data to process.
-     * @return array processed data.
-     */
-    public function checkboxCallback($data)
-    {
-        $this->selectedNodes = $data['selected'];
-        unset($data['selected']);
-        $data['options'] = [
-            'types'    => $this->types,
-            'plugins'  => ['checkbox', 'search', 'types'],
-            'checkbox' => ["keep_selected_style" => false]
-        ];
-        $data['binds']   = [
-            'changed.jstree'     => 'function(event, data){
-                var url = data.node.a_attr.href.replace("access-roles/update", "assign/change")
-                    + "&add=" + (data.action=="select_node" ? 1 : 0)
-                    + "&user_id=" + ' . $_GET['id'] . ';
-                $.ajax({url:url}).error(function(data){ alert(data.responseText); });
-            }',
-            'select_node.jstree' => 'function(){return false;} '
-        ];
-        $items = AuthItem::find()->where(['type' => Item::TYPE_ROLE])->indexBy('name')->all();
-        $relations = AuthItemChild::find()->where(['parent' => array_keys($items)])->all();
         $data['items'] = $this->generateTree($items, $relations);
         return $data;
     }

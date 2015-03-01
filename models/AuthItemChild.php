@@ -10,6 +10,8 @@ namespace bariew\rbacModule\models;
 
 use Yii;
 use yii\db\ActiveRecord;
+use app\controllers\SiteController;
+use yii\helpers\FileHelper;
 
 /**
  * This is the model class for table "auth_item_child".
@@ -31,14 +33,57 @@ class AuthItemChild extends ActiveRecord
         return AuthItem::roleList();
     }
     
-    /**
-     * Gets permission list.
-     * @return array list
-     */
     public static function permissionList()
     {
-        return AuthItem::permissionList();
+        $result = [];
+        $controller = new SiteController('site', Yii::$app->controller->module);
+        foreach (self::controllerActions($controller) as $action) {
+            $result['app'][$controller->id][$action] = AuthItem::createPermissionName(['app', $controller->id, $action]);
+        }
+        foreach (Yii::$app->modules as $moduleName => $config) {
+            $module = Yii::$app->getModule($moduleName);
+            $controllerFiles = FileHelper::findFiles($module->controllerPath);
+            foreach ($controllerFiles as $file) {
+                if (!preg_match('/.*\/(\w+)Controller\.php$/', $file, $matches)) {
+                    continue;
+                }
+                $id = self::getRouteName($matches[1]);
+                $controller = $module->createControllerByID($id);
+                foreach (self::controllerActions($controller) as $action) {
+                    $result[$moduleName][$controller->id][$action] 
+                        = AuthItem::createPermissionName([$module->id, $controller->id, $action]);
+                }
+            }
+        }
+        return $result;
     }
+
+    private static function controllerActions(\yii\base\Controller $controller)
+    {
+        try {
+            $actions = array_keys($controller->actions());
+        } catch (\Exception $e) {
+            $actions = [];
+        }
+        $reflection = new \ReflectionClass($controller);
+        foreach ($reflection->getMethods() as $method) {
+            if (!preg_match('/^action([A-Z].*)/', $method->name, $matches)) {
+                continue;
+            }
+            $actions[] = self::getRouteName($matches[1]);
+        }
+        return $actions;
+    }
+
+    public static function getRouteName($string)
+    {
+        return strtolower(
+            implode('-',
+                preg_split('/([[:upper:]][[:lower:]]+)/', $string, null, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY)
+            )
+        );
+    }
+
 
     /**
      * Gets list of all children name for the parent.

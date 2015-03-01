@@ -67,62 +67,6 @@ class AuthItem extends ActiveRecord
         ];
     }
 
-    public static function permissionList()
-    {
-        $result = [];
-
-        $controller = new SiteController('site', Yii::$app->controller->module);
-        foreach (self::controllerActions($controller) as $action) {
-            $result[] = self::createPermissionName(['app', $controller->id, $action]);
-        }
-
-        foreach (Yii::$app->modules as $moduleName => $config) {
-            $module = Yii::$app->getModule($moduleName);
-            $controllerFiles = FileHelper::findFiles($module->controllerPath);
-            foreach ($controllerFiles as $file) {
-                if (!preg_match('/.*\/(\w+)Controller\.php$/', $file, $matches)) {
-                    continue;
-                }
-                $id = self::getRouteName($matches[1]);
-                $controller = $module->createControllerByID($id);
-                foreach (self::controllerActions($controller) as $action) {
-                    $result[] = self::createPermissionName([$module->id, $controller->id, $action]);
-                }
-            }
-        }
-
-
-        asort($result);
-        return $result;
-    }
-
-    private static function controllerActions(\yii\base\Controller $controller)
-    {
-        try {
-            $actions = array_keys($controller->actions());
-        } catch (\Exception $e) {
-            $actions = [];
-        }
-        $reflection = new \ReflectionClass($controller);
-        foreach ($reflection->getMethods() as $method) {
-            if (!preg_match('/^action([A-Z].*)/', $method->name, $matches)) {
-                continue;
-            }
-            $actions[] = self::getRouteName($matches[1]);
-        }
-        return $actions;
-    }
-
-    public static function getRouteName($string)
-    {
-        return strtolower(
-            implode('-',
-                preg_split('/([[:upper:]][[:lower:]]+)/', $string, null, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY)
-            )
-        );
-    }
-
-
     /**
      * Creates valid permission name for controller action.
      * @param array $data items for permission name (moduleId, ControllerId, ActionId).
@@ -333,20 +277,6 @@ class AuthItem extends ActiveRecord
         ]);
     }
 
-    public function addItem()
-    {
-        if (!$this->validate()) {
-            return false;
-        }
-        if ($this->findOne([
-            'name' => $this->name,
-            'type' => $this->type
-        ])) {
-            return true;
-        }
-        return Yii::$app->authManager->add($this->getItem());
-    }
-
     public function updateItem()
     {
         return Yii::$app->authManager->update($this->oldAttributes['name'], $this->getItem());
@@ -372,6 +302,9 @@ class AuthItem extends ActiveRecord
      */
     public function addChild(AuthItem $item)
     {
+        if ($item->isNewRecord && !$item->save()) {
+            return false;
+        }
         return Yii::$app->authManager->addChild($this, $item);
     }
 

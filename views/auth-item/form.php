@@ -9,11 +9,18 @@
         'content' => $this->render('_form', compact('model')),
     ]];
     if (!$model->isNewRecord) {
-        $items[] = [
-            'label' => Yii::t('modules/rbac', 'Users'),
-            'url' => ['auth-assignment/role-users', 'name'=>$model->name],
-            'visible'   => false
-        ];
+        $items = array_merge($items, [
+            [
+                'label' => Yii::t('modules/rbac', 'Users'),
+                'url' => ['auth-assignment/role-users', 'name' => $model->name],
+                'visible'   => false
+            ],
+            [
+                'label' => Yii::t('modules/rbac', 'Permissions'),
+                'url' => ['auth-item-child/tree', 'name' => $model->name],
+                'visible'   => false
+            ],
+        ]);
     }
 
     echo \yii\jui\Tabs::widget([

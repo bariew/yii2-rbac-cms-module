@@ -9,9 +9,7 @@ use bariew\rbacModule\models\AuthItem;
 use Yii;
 use yii\rbac\Item;
 use yii\web\Controller;
-use yii\helpers\Html;
 use \yii\web\NotFoundHttpException;
-use \yii\web\Response;
 /**
  * Контроллер служит для создания "ролей".
  * В таблице, в которой хранятся роли, точно также хранятся ещё и "права доступа",
@@ -71,31 +69,13 @@ class AuthItemController extends Controller
      * @param integer $id parent id
      * @return \yii\web\View action view
      */
-    public function actionTreeCreateRole($id)
+    public function actionCreate($id)
     {
         $parent = $this->findModel($id);
         $model = $this->findModel();
         $model->type = Item::TYPE_ROLE;
-        if ($model->load(\Yii::$app->request->post()) && $model->addItem()) {
-            $parent->addChild($model);
+        if ($model->load(\Yii::$app->request->post()) && $parent->addChild($model)) {
             Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'Role saved'));
-            return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
-        }
-        return $this->render('form', compact('model'));
-    }
-    /**
-     * Creates new permission attached to $id owner.
-     * @param integer $id parent id
-     * @return \yii\web\View action view
-     */
-    public function actionTreeCreatePermission($id)
-    {
-        $parent = $this->findModel($id);
-        $model = $this->findModel();
-        $model->type = Item::TYPE_PERMISSION;
-        if ($model->load(\Yii::$app->request->post()) && $model->addItem()) {
-            $parent->addChild($model);
-            Yii::$app->session->setFlash('success', Yii::t('modules/rbac', 'Permission saved'));
             return $this->redirect(['update', 'id' => $model->name, 'pid' => $parent->name]);
         }
         return $this->render('form', compact('model'));
