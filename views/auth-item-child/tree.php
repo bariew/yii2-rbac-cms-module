@@ -17,7 +17,13 @@ use yii\helpers\Url;
     <ul>
         <?php foreach ($controllerActions as $controllerName => $actions): ?>
             <li>
-                <h5><?= $controllerName; ?></h5>        
+                <h5><?= Html::checkbox($controllerName, !array_diff($actions, $children), [
+                        'onchange' => 'var t = $(this); t.parents("li").find("input").each(function(){'
+                            . 'if($(this).is(":checked") != t.is(":checked")){'
+                                . '$(this).click(); '
+                            . '}'
+                        . '})'
+                    ]) . ' ' .$controllerName; ?></h5>        
                 <ul>
                     <?php foreach ($actions as $action): ?>
                         <li>
