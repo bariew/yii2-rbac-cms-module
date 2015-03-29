@@ -38,11 +38,7 @@ class EventHandlers
     
     public static function responseAfterPrepare($event)
     {
-
         if (get_class(Yii::$app) == Application::className()) {
-            return true;
-        }
-        if (in_array(Yii::$app->controller->module->id, ['gii', 'debug'])) {
             return true;
         }
         $event->sender->content = ViewAccess::denyLinks($event->sender->content);

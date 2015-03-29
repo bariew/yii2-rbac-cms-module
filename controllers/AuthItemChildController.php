@@ -44,7 +44,7 @@ class AuthItemChildController extends Controller
         $parent = $this->findParentModel($name);
         $children = $parent->getPermissions()->select('name')->column();
         $actions = AuthItemChild::permissionList();
-        return $this->render('tree', compact('parent', 'children', 'actions'));
+        return $this->renderPartial('tree', compact('parent', 'children', 'actions'));
     }
     
     /**
