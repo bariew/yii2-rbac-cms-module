@@ -30,11 +30,11 @@ class ViewAccess extends Object
 {
     /**
      * Checks whether links are available and removes/disables them.
-     * @param ViewEvent $innerEvent view event.
+     * @param string $content view event.
      */
-    public static function denyLinks($innerEvent)
+    public static function denyLinks($content)
     {
-        $doc = \phpQuery::newDocumentHTML($innerEvent->output);
+        $doc = \phpQuery::newDocumentHTML($content);
         foreach ($doc->find('a') as $el) {
             $link = pq($el);
             if (self::checkHrefAccess($link->attr('href'))) {
@@ -49,7 +49,7 @@ class ViewAccess extends Object
                 $ul->parent('li.dropdown')->addClass('hide');
             }
         }
-        $innerEvent->output = $doc;
+        return $doc;
     }
 
     /**
