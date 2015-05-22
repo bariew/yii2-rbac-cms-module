@@ -42,7 +42,8 @@ class AuthItem extends ActiveRecord
      */
     public $childrenTree = [];
 
-    public static $userRoles;
+    public static $userRoles = [];
+    public static $defaultRoles = [];
 
     public static function defaultRoleList()
     {
@@ -77,13 +78,18 @@ class AuthItem extends ActiveRecord
         return implode('/', $data);
     }
 
-    protected static function setUserAccess($user_id)
+    protected static function setDefaultRoles($user_id)
     {
-        if (!$user_id) {
-            return;
-        }
-        Yii::$app->authManager->defaultRoles = AuthItemChild::childList(self::ROLE_DEFAULT);
-        self::$userRoles[$user_id] = Yii::$app->authManager->getRolesByUser($user_id);
+        self::$defaultRoles = $user_id
+            ? AuthItemChild::childList(self::ROLE_DEFAULT)
+            : AuthItemChild::childList(self::ROLE_GUEST);
+
+        self::$defaultRoles
+            = Yii::$app->authManager->defaultRoles
+            = array_merge(
+            Yii::$app->authManager->defaultRoles,
+            self::$defaultRoles
+        );
     }
 
     /**
@@ -102,16 +108,20 @@ class AuthItem extends ActiveRecord
             $user = Yii::$app->user;
         }
 
-        if ($user->isGuest && !Yii::$app->authManager->defaultRoles) {
-            Yii::$app->authManager->defaultRoles = AuthItemChild::childList(self::ROLE_GUEST);
-        } else if (!isset(self::$userRoles[$user->id])) {
-            self::setUserAccess($user->id);
+        if (!$user->isGuest && !isset(self::$userRoles[$user->id])) {
+            self::$userRoles[$user->id] = Yii::$app->authManager->getRolesByUser($user->id);
         }
 
         if (isset(self::$userRoles[$user->id][self::ROLE_ROOT])) {
             return true;
         }
 
+        if (!self::$defaultRoles) {
+            self::setDefaultRoles($user->id);
+        }
+        if (in_array($permissionName, self::$defaultRoles)) {
+            return true;
+        }
         return $user->can($permissionName, $params);
     }
 
