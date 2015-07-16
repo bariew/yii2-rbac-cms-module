@@ -13,12 +13,16 @@ class m141208_072026_guest_permissions extends Migration
             'app/site/index',
             'app/site/error',
             'user/default/login',
+            'user/default/register',
+            'user/default/confirm',
+            'user/default/auth',
             'debug/default/toolbar',
         ];
         return [
             AuthItem::ROLE_GUEST => $guestAccess,
             AuthItem::ROLE_DEFAULT => array_merge($guestAccess, [
                 'user/default/logout',
+                'user/default/update',
             ]),
         ];
     }
