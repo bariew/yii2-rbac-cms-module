@@ -87,9 +87,9 @@ class AuthItem extends ActiveRecord
         self::$defaultRoles
             = Yii::$app->authManager->defaultRoles
             = array_merge(
-            Yii::$app->authManager->defaultRoles,
-            self::$defaultRoles
-        );
+                Yii::$app->authManager->defaultRoles,
+                self::$defaultRoles
+            );
     }
 
     /**
@@ -122,6 +122,7 @@ class AuthItem extends ActiveRecord
         if (in_array($permissionName, self::$defaultRoles)) {
             return true;
         }
+
         return $user->can($permissionName, $params);
     }
 

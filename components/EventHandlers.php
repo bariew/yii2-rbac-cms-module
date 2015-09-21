@@ -55,7 +55,8 @@ class EventHandlers
         $controller = $event->sender;
         $permissionName = AuthItem::createPermissionName([$controller->module->id, $controller->id, $controller->action->id]);
         if (!AuthItem::checkAccess($permissionName, Yii::$app->user)) {
-            throw new HttpException(403, Yii::t('modules/rbac', 'access_denied'));
+            throw new HttpException(403, Yii::$app->request->absoluteUrl);
+            throw new HttpException(403, Yii::t('modules/rbac', 'Access denied'));
         }
     }
 
@@ -69,7 +70,7 @@ class EventHandlers
         $permissionName = AuthItem::createPermissionName([$controller->module->id, $controller->id, $controller->action->id]);
 
         if (!AuthItem::checkAccess($permissionName, false, compact('model'))) {
-            throw new HttpException(403, Yii::t('modules/rbac', 'access_denied'));
+            throw new HttpException(403, Yii::t('modules/rbac', 'Access denied'));
         }
     }
 
