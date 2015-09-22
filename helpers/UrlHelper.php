@@ -37,8 +37,9 @@ class UrlHelper extends Url
         if (!isset($parsedUrl['path'])) {
             return false;
         }
+        $path = str_replace('/' . basename(Yii::$app->request->scriptFile), '', $parsedUrl['path']);
         $request = self::$_request ? self::$_request : (self::$_request = new Request());
-        $request->setPathInfo($parsedUrl['path']);
+        $request->setPathInfo($path);
         $rule = explode('/', Yii::$app->urlManager->parseRequest($request)[0]);
 
         if (count($rule) == 2) {
