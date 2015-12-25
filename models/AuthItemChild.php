@@ -35,22 +35,24 @@ class AuthItemChild extends ActiveRecord
     
     public static function permissionList()
     {
-        $result = [];
+      $result = [];
         $modules = array_merge([Yii::$app], \Yii::$app->modules);
         foreach ($modules as $moduleName => $data) {
             $module = is_object($data) ? $data : Yii::$app->getModule($moduleName);
-            $controllerFiles = FileHelper::findFiles($module->controllerPath);
-            foreach ($controllerFiles as $file) {
-                if (!preg_match('/.*\/(\w+)Controller\.php$/', $file, $matches)) {
-                    continue;
+            try {
+                $controllerFiles = FileHelper::findFiles($module->controllerPath);
+                foreach ($controllerFiles as $file) {
+                    if (!preg_match('/.*[\/\\\](\w+)Controller\.php$/', $file, $matches)) {
+                        continue;
+                    }
+                    $id = self::getRouteName($matches[1]);
+                    $controller = $module->createControllerByID($id);
+                    foreach (self::controllerActions($controller) as $action) {
+                        $result[$module->id][$controller->id][$action]
+                            = AuthItem::createPermissionName([$module->id, $controller->id, $action]);
+                    }
                 }
-                $id = self::getRouteName($matches[1]);
-                $controller = $module->createControllerByID($id);
-                foreach (self::controllerActions($controller) as $action) {
-                    $result[$module->id][$controller->id][$action] 
-                        = AuthItem::createPermissionName([$module->id, $controller->id, $action]);
-                }
-            }
+            } catch (\Exception $e) {}
         }
         ksort($result);
         return $result;
