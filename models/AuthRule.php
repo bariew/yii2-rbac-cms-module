@@ -7,6 +7,7 @@
 
 namespace bariew\rbacModule\models;
 
+use bariew\rbacModule\Module;
 use Yii;
 use \yii\db\ActiveRecord;
 use yii\rbac\Rule;
@@ -26,6 +27,15 @@ class AuthRule extends ActiveRecord
     public $ruleClass;
 
     public $rule;
+
+    /**
+     * @inheritdoc
+     */
+    public static function getDb()
+    {
+        return Module::getDb();
+    }
+
     /**
      * @inheritdoc
      */

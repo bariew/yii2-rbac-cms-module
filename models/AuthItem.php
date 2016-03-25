@@ -8,6 +8,7 @@
 namespace bariew\rbacModule\models;
 
 use app\controllers\SiteController;
+use bariew\rbacModule\Module;
 use Yii;
 use yii\helpers\FileHelper;
 use \yii\rbac\Item;
@@ -44,6 +45,14 @@ class AuthItem extends ActiveRecord
 
     public static $userRoles = [];
     public static $defaultRoles = [];
+
+    /**
+     * @inheritdoc
+     */
+    public static function getDb()
+    {
+        return Module::getDb();
+    }
 
     public static function defaultRoleList()
     {

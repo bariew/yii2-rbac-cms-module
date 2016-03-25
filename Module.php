@@ -20,6 +20,7 @@ use yii\db\ActiveRecord;
  */
 class Module extends \yii\base\Module
 {
+    public $dbConnection;
     public $params = [
         'menu'  => [
             'label' => 'Settings',
@@ -33,41 +34,12 @@ class Module extends \yii\base\Module
         ]
     ];
 
-    /**
-     * @inheritdoc
-     */
-    public $controllerNamespace = 'bariew\rbacModule\controllers';
-
-    public function install($moduleName)
+    public static function getDb()
     {
-        try {
-            $identity = \Yii::$app->user->identityClass;
-        } catch (\Exception $e) {
-            $identity = null;
-        }
-        if ($identity && ($id = \Yii::$app->user->id)) {
-            return $this->setRootUser($id);
-        }
-
-        $url = Html::a("link", Url::toRoute(["/{$moduleName}/auth-item/update", "id"=>"root", "pid"=>""]));
-        /**
-         * @var ActiveRecord $identity
-         */
-        if ($identity && class_exists($identity) && ($identity::find()->count())) {
-            $id = $identity::find()->orderBy([$identity::primaryKey() => SORT_ASC])->one()->primaryKey;
-            $this->setRootUser($id);
-            $message = \Yii::t('modules/rbac', 'Root attached to first user. You may attach Root role manually: '.$url);
-        } else {
-            $message = \Yii::t('modules/rbac', 'No user found. You may create user and attach Root role manually: '.$url);
-        }
-
-        return \Yii::$app->session->setFlash('error', $message);
+        /** @var self $module */
+        $module = \Yii::$app->getModule('rbac');
+        return $module->dbConnection
+            ? \Yii::createObject($module->dbConnection)
+            : \Yii::$app->db;
     }
-
-    private function setRootUser($id)
-    {
-        return (new AuthAssignment(['item_name' => AuthItem::ROLE_ROOT, 'user_id' => $id]))->save(false);
-    }
-
-
 }

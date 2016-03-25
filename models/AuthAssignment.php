@@ -6,6 +6,7 @@
  */
 
 namespace bariew\rbacModule\models;
+use bariew\rbacModule\Module;
 use Yii;
 use \yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -22,6 +23,14 @@ use yii\helpers\ArrayHelper;
  */
 class AuthAssignment extends ActiveRecord
 {
+    /**
+     * @inheritdoc
+     */
+    public static function getDb()
+    {
+        return Module::getDb();
+    }
+
     /**
      * @inheritdoc
      */
@@ -80,7 +89,7 @@ class AuthAssignment extends ActiveRecord
     /**
      * Searches all user assignments.
      * @param object $user user instance
-     * @return \yii\web\Query search object
+     * @return \yii\db\Query search object
      */
     public static function userAssignments($user)
     {

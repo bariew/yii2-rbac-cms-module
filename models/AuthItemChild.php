@@ -8,9 +8,9 @@
 
 namespace bariew\rbacModule\models;
 
+use bariew\rbacModule\Module;
 use Yii;
 use yii\db\ActiveRecord;
-use app\controllers\SiteController;
 use yii\helpers\FileHelper;
 
 /**
@@ -24,6 +24,14 @@ use yii\helpers\FileHelper;
  */
 class AuthItemChild extends ActiveRecord
 {
+    /**
+     * @inheritdoc
+     */
+    public static function getDb()
+    {
+        return Module::getDb();
+    }
+
     /**
      * Gets role list.
      * @return array list
