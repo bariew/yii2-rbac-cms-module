@@ -8,7 +8,7 @@
 namespace bariew\rbacModule\components;
 
 use \Yii;
-use yii\base\Object;
+use yii\base\BaseObject;
 use yii\base\ViewEvent;
 use bariew\rbacModule\helpers\UrlHelper;
 use bariew\rbacModule\models\AuthItem;
@@ -26,7 +26,7 @@ use yii\console\Application;
  *
  * @author Pavel Bariev <bariew@yandex.ru>
  */
-class ViewAccess extends Object
+class ViewAccess extends BaseObject
 {
     /**
      * Checks whether links are available and removes/disables them.
