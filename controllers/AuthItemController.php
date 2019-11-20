@@ -45,7 +45,7 @@ class AuthItemController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index', compact('model'));
+        return $this->render('index');
     }
     /**
      * Обновление модели.
