@@ -1,8 +1,12 @@
-<div class="row">
-    <div class="col-md-3 well">
-        <?= \Yii::$app->controller->menu; ?>
-    </div>
-    <div class="col-md-9">
+<?php
 
-    </div>
+use bariew\rbacModule\widgets\AuthItemMenu;
+use yii\web\View;
+
+/**
+ * @var View $this
+ */
+?>
+<div class="row">
+    <div class="col-md-3 well"><?= AuthItemMenu::widget(); ?></div>
 </div>

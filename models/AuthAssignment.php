@@ -61,7 +61,7 @@ class AuthAssignment extends ActiveRecord
     {
         return [
             'timestamp' => [
-                'class'      => TimestampBehavior::className(),
+                'class'      => TimestampBehavior::class,
                 'attributes' => [
                     self::EVENT_BEFORE_INSERT => ['created_at'],
                 ],
@@ -74,7 +74,7 @@ class AuthAssignment extends ActiveRecord
      */
     public function getItemName()
     {
-        return $this->hasOne(AuthItem::className(), ['name' => 'item_name']);
+        return $this->hasOne(AuthItem::class, ['name' => 'item_name']);
     }
     
     /**

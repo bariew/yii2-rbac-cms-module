@@ -87,7 +87,7 @@ class AuthRule extends ActiveRecord
      */
     public function getAuthItems()
     {
-        return $this->hasMany(AuthItem::className(), ['rule_name' => 'name']);
+        return $this->hasMany(AuthItem::class, ['rule_name' => 'name']);
     }
 
     public static function listAll()
