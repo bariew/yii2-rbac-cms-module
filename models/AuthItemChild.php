@@ -126,7 +126,7 @@ class AuthItemChild extends ActiveRecord
      */
     public function getRole()
     {
-        return $this->hasOne(AuthItem::className(), ['name' => 'parent']);
+        return $this->hasOne(AuthItem::class, ['name' => 'parent']);
     }
 
     /**
@@ -134,6 +134,6 @@ class AuthItemChild extends ActiveRecord
      */
     public function getPermission()
     {
-        return $this->hasOne(AuthItem::className(), ['name' => 'child']);
+        return $this->hasOne(AuthItem::class, ['name' => 'child']);
     }
 }

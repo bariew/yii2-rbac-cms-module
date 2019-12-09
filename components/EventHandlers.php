@@ -27,7 +27,7 @@ class EventHandlers
      */
     public static function afterViewRenderLinkRemove($event)
     {
-        if (get_class(Yii::$app) == Application::className()) {
+        if (get_class(Yii::$app) == Application::class) {
             return true;
         }
         if (in_array(Yii::$app->controller->module->id, ['gii', 'debug'])) {
@@ -38,7 +38,7 @@ class EventHandlers
     
     public static function responseAfterPrepare($event)
     {
-        if (get_class(Yii::$app) == Application::className()) {
+        if (get_class(Yii::$app) == Application::class) {
             return true;
         }
         $event->sender->content = ViewAccess::denyLinks($event->sender->content);
